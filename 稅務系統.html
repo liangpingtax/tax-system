@@ -1012,11 +1012,7 @@ function mlSetStoreAmt(type,v,s,m,val){
   if(!colData[m][type][v])colData[m][type][v]={};
   if(!colData[m][type][v][s])colData[m][type][v][s]={amount:0,color:''};
   colData[m][type][v][s].amount=Number(val)||0;
-  if(!svData[m])svData[m]={};
-  if(!svData[m][s])svData[m][s]={};
-  if(!svData[m][s][v])svData[m][s][v]={checked:false,amount:0};
-  svData[m][s][v].amount=Number(val)||0;
-  svData[m][s][v].checked=!!(Number(val));
+  // 不覆蓋svData，叫貨金額獨立保存
   mlUpdateRowSummary(type,v);
   autoSave();
 }
