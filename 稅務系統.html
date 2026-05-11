@@ -1,0 +1,2033 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Microsoft JhengHei',Arial,sans-serif;font-size:14px;background:#e8f5ee;display:flex;min-height:100vh;color:#1a1f3a;}
+/* 隱藏number input箭頭 */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+input[type=number]{-moz-appearance:textfield;}
+/* 左側導覽 */
+.side-nav{width:195px;min-height:100vh;background:#1a4731;display:flex;flex-direction:column;flex-shrink:0;padding-top:16px;}
+.side-nav .app-title{color:rgba(255,255,255,0.95);font-size:15px;font-weight:700;padding:0 18px 16px;letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,0.2);margin-bottom:10px;}
+.side-nav button{padding:13px 18px;font-size:14px;font-weight:500;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.82);white-space:nowrap;text-align:left;width:100%;border-left:4px solid transparent;line-height:1.4;}
+.side-nav button.active{color:#fff;border-left-color:#6ee7a0;background:rgba(255,255,255,0.18);}
+.side-nav button:hover:not(.active){color:#fff;background:rgba(255,255,255,0.1);}
+/* 主內容區 - 滿版 */
+.main-area{flex:1;padding:16px;overflow-x:auto;}
+.page-inner{background:#fff;border-radius:10px;padding:18px;width:100%;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.page{display:none;width:100%;}
+.page.active{display:block;}
+/* cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px;}
+.card{background:#fff;border-radius:8px;padding:11px 14px;border:1px solid #b7e0c9;box-shadow:0 1px 3px rgba(0,0,0,0.04);}
+.card .lbl{font-size:12px;color:#2a3060;margin-bottom:3px;}
+.card .val{font-size:17px;font-weight:600;color:#0d1530;}
+.ybox{border:1px solid #b7e0c9;border-radius:8px;padding:13px 16px;margin-bottom:14px;background:#fff;}
+.ybox-title{font-size:13px;color:#2a3060;font-weight:500;margin-bottom:8px;}
+/* toolbar */
+.toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.btn{font-size:13px;padding:7px 15px;border-radius:6px;border:1px solid #c0cee4;background:#fff;cursor:pointer;color:#1a1f3a;}
+.btn:hover{background:#eef2f9;}
+.btn.green{background:#1a6b3a;color:#fff;border-color:#1a6b3a;}
+.btn.green:hover{background:#145a2e;}
+.btn.excel{background:#2d7a4a;color:#fff;border-color:#2d7a4a;}
+.btn.excel:hover{background:#236038;}
+/* table */
+.tbl-wrap{overflow-x:auto;border:1px solid #b7e0c9;border-radius:8px;margin-bottom:14px;background:#fff;}
+table{width:100%;border-collapse:collapse;table-layout:auto;}
+th{background:#e8f5ee;padding:9px 10px;text-align:left;font-size:13px;color:#1a4731;border-bottom:1px solid #b7e0c9;white-space:nowrap;font-weight:600;}
+td{padding:7px 9px;border-bottom:1px solid #eaeff8;vertical-align:middle;font-size:13px;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#f7fafc;}
+td input,td select{width:100%;border:none;background:transparent;font-size:13px;font-family:inherit;outline:none;color:#111;}
+td input:focus,td select:focus{background:#eef3fb;border-radius:3px;padding:1px 3px;}
+td input[readonly]{color:#556680;}
+.del{background:none;border:none;color:#c8dbd2;cursor:pointer;font-size:15px;padding:1px 5px;border-radius:3px;}
+.del:hover{color:#e57373;background:#fdecea;}
+/* month tabs */
+.mtabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:13px;}
+.mtab{padding:6px 13px;font-size:13px;border-radius:5px;border:1px solid #c0cee4;background:#fff;color:#2a3060;cursor:pointer;}
+.mtab.active{background:#1a6b3a;color:#fff;border-color:#1a6b3a;font-weight:500;}
+.mtab.has{color:#1a6b3a;border-color:#1a6b3a;font-weight:500;}
+/* upload */
+.upanel{border:1px solid #b7e0c9;border-radius:8px;padding:13px;margin-bottom:13px;background:#f7fafc;}
+.upanel-title{font-size:13px;font-weight:600;color:#1a2050;margin-bottom:9px;}
+.store-btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;}
+.sbtn{padding:6px 13px;font-size:13px;border-radius:18px;border:1px solid #c0cee4;background:#fff;color:#2a3060;cursor:pointer;transition:all 0.15s;}
+.sbtn.sel{background:#1a6b3a;color:#fff;border-color:#1a6b3a;}
+.dzone{border:2px dashed #7ecb9a;border-radius:8px;padding:20px;text-align:center;cursor:pointer;position:relative;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#fff;}
+.dzone.on{border-color:#4a5568;background:#edf2f7;}
+.dzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.prev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:7px;margin-top:9px;}
+.prev-item{position:relative;border-radius:6px;overflow:hidden;border:1px solid #b7e0c9;}
+.prev-item img{width:100%;height:66px;object-fit:cover;display:block;}
+.pst{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;}
+.pst.sc{background:rgba(0,0,0,0.45);color:#fff;}
+.pst.ok{background:rgba(45,122,74,0.75);color:#fff;}
+.pst.er{background:rgba(200,60,60,0.65);color:#fff;}
+.prm{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.45);color:#fff;border:none;border-radius:50%;width:15px;height:15px;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.scan-btn{margin-top:9px;width:100%;padding:8px;border-radius:6px;border:none;background:#1a6b3a;color:#fff;font-size:13px;font-weight:600;cursor:pointer;}
+.scan-btn:disabled{background:#a0aec0;cursor:not-allowed;}
+.scan-res{margin-top:8px;padding:9px 12px;border-radius:6px;background:#e8eef8;font-size:11px;color:#1a2050;display:none;border:1px solid #b0c8e4;}
+.scan-res.show{display:block;}
+/* row colors */
+tr.g0 td{background:rgba(239,154,154,0.15)!important;}
+tr.g1 td{background:rgba(255,236,179,0.2)!important;}
+tr.g2 td{background:rgba(187,222,251,0.2)!important;}
+tr.g3 td{background:rgba(200,230,201,0.2)!important;}
+tr.g4 td{background:rgba(209,196,233,0.18)!important;}
+tr.g5 td{background:rgba(255,204,128,0.18)!important;}
+tr.g6 td{background:rgba(178,223,219,0.2)!important;}
+tr.g7 td{background:rgba(255,171,64,0.15)!important;}
+tr.g8 td{background:rgba(240,98,146,0.12)!important;}
+tr.g9 td{background:rgba(220,237,200,0.25)!important;}
+/* note autocomplete */
+.note-wrap{position:relative;}
+.note-drop{position:absolute;top:100%;left:0;z-index:200;background:#fff;border:1px solid #c0cee4;border-radius:6px;max-height:130px;overflow-y:auto;min-width:155px;box-shadow:0 4px 16px rgba(0,0,0,0.1);display:none;}
+.note-drop.show{display:block;}
+.note-opt{padding:7px 11px;cursor:pointer;font-size:13px;color:#1a1f3a;}
+.note-opt:hover{background:#e2f4eb;}
+/* collect table */
+.ctbl-wrap{overflow-x:auto;border:1px solid #b7e0c9;border-radius:8px;background:#fff;}
+.ctbl{border-collapse:collapse;font-size:11px;width:100%;}
+.ctbl th{background:#e8f5ee;padding:5px 4px;border:1px solid #b7e0c9;font-size:11px;white-space:nowrap;text-align:center;color:#1a4731;font-weight:600;}
+.ctbl th.th-s{color:#fff;font-size:11px;font-weight:700;padding:5px 4px;}
+.ctbl th.th-sum{background:#1a6b3a;color:#fff;font-size:11px;padding:5px 6px;}
+.ctbl td{padding:3px 3px;border:1px solid #eaeff8;text-align:right;min-width:0;font-size:11px;}
+.ctbl td.lbl{text-align:left;white-space:nowrap;background:#f7fafc;font-size:13px;font-weight:500;min-width:160px;max-width:180px;overflow:hidden;text-overflow:ellipsis;position:sticky;left:0;border-right:2px solid #c0cee4;color:#1a1f3a;}
+.ctbl td.sec{background:#1a6b3a;color:#fff;font-weight:600;text-align:center;}
+.ctbl td.r-decl{background:#f0faf4;}
+.ctbl td.r-adj{background:#fffde7;}
+.ctbl td.r-actual{background:#d4eddf;font-weight:700;color:#0d1530;}
+.ctbl td.r-carry{background:#fff8e1;color:#e65100;font-style:italic;}
+.ctbl td.r-tot{background:#e2f4eb;font-weight:700;color:#1a4731;white-space:nowrap;}
+.ctbl td.ok{color:#276749;font-weight:700;}
+.ctbl td.bad{color:#c62828;font-weight:700;}
+.ctbl input.ci{width:52px;border:none;background:transparent;font-size:11px;text-align:right;outline:none;font-family:inherit;}
+.ctbl input.ci:focus{background:rgba(255,255,255,0.7);border-radius:3px;}
+/* 各店面表頭顏色 - 品牌色系，差異明顯 */
+/* 0新生北=星巴克綠 1泉州=IKEA藍 2新莊=可口可樂紅 3鑫耀鑫=麥當勞橘 4梁鑫=蒂芙尼藍 5鑫營=葡萄紫 6府中=抹茶綠 7景新=玫瑰粉 8天津=寶藍 9大直=磚紅 10心惦=橄欖綠 11幸福=金黃 12福城=深灰 13梁平=炭黑 */
+.ctbl th.th-s0{background:#00704a;color:#fff;}  /* 星巴克綠 */
+.ctbl th.th-s1{background:#0058a3;color:#fff;}  /* IKEA藍 */
+.ctbl th.th-s2{background:#e8000d;color:#fff;}  /* 可口可樂紅 */
+.ctbl th.th-s3{background:#ff6600;color:#fff;}  /* 麥當勞橘 */
+.ctbl th.th-s4{background:#0abab5;color:#fff;}  /* 蒂芙尼藍 */
+.ctbl th.th-s5{background:#6b21a8;color:#fff;}  /* 葡萄紫 */
+.ctbl th.th-s6{background:#4d7c0f;color:#fff;}  /* 抹茶綠 */
+.ctbl th.th-s7{background:#db2777;color:#fff;}  /* 玫瑰粉 */
+.ctbl th.th-s8{background:#1e3a8a;color:#fff;}  /* 寶藍 */
+.ctbl th.th-s9{background:#b45309;color:#fff;}  /* 琥珀棕 */
+.ctbl th.th-s10{background:#065f46;color:#fff;} /* 深森綠 */
+.ctbl th.th-s11{background:#a16207;color:#fff;} /* 金黃 */
+.ctbl th.th-s12{background:#374151;color:#fff;} /* 深灰 */
+.ctbl th.th-s13{background:#111827;color:#fff;} /* 炭黑 */
+/* 各店面欄位底色（對應淡色） */
+.ctbl td.cs0{background:rgba(0,112,74,0.07);}
+.ctbl td.cs1{background:rgba(0,88,163,0.07);}
+.ctbl td.cs2{background:rgba(232,0,13,0.06);}
+.ctbl td.cs3{background:rgba(255,102,0,0.07);}
+.ctbl td.cs4{background:rgba(10,186,181,0.07);}
+.ctbl td.cs5{background:rgba(107,33,168,0.07);}
+.ctbl td.cs6{background:rgba(77,124,15,0.07);}
+.ctbl td.cs7{background:rgba(219,39,119,0.06);}
+.ctbl td.cs8{background:rgba(30,58,138,0.07);}
+.ctbl td.cs9{background:rgba(180,83,9,0.07);}
+.ctbl td.cs10{background:rgba(6,95,70,0.07);}
+.ctbl td.cs11{background:rgba(161,98,7,0.07);}
+.ctbl td.cs12{background:rgba(55,65,81,0.07);}
+.ctbl td.cs13{background:rgba(17,24,39,0.07);}
+/* 格子顏色（下拉選單選色） */
+/* 已收到：深綠字體，下月才收：橘色字體，不改底色 */
+.ctbl td.cc-green input.ci{color:#166534!important;font-weight:700;}
+.ctbl td.cc-orange input.ci{color:#ea6c00!important;font-weight:700;}
+.cell-wrap{display:flex;align-items:center;gap:2px;}
+.cell-wrap input.ci{flex:1;min-width:0;}
+select.clr-sel{border:none;background:transparent;font-size:13px;cursor:pointer;padding:0;outline:none;width:20px;flex-shrink:0;appearance:none;-webkit-appearance:none;text-align:center;}
+/* collect tab */
+.ctab{padding:7px 18px;font-size:13px;font-weight:600;border-radius:6px;border:2px solid #1a6b3a;background:#fff;color:#1a6b3a;cursor:pointer;transition:all 0.15s;}
+.ctab.active{background:#1a6b3a;color:#fff;}
+.ctab:hover:not(.active){background:#e2f4eb;}
+.pending-box{margin-top:14px;border:2px solid #ea6c00;border-radius:8px;overflow:hidden;max-width:480px;}
+.pending-title{background:#ea6c00;color:#fff;padding:9px 15px;font-size:14px;font-weight:700;display:flex;justify-content:space-between;align-items:center;}
+.pending-list{background:#fff;max-height:260px;overflow-y:auto;}
+.pending-row{display:flex;align-items:center;border-bottom:1px solid #fddcb5;font-size:13px;}
+.pending-row:last-child{border-bottom:none;}
+.pending-row:hover{background:#fff8f0;}
+.pending-row.pr-checked{opacity:0.45;text-decoration:line-through;}
+.pr-chk{padding:4px 8px;display:flex;align-items:center;border-right:1px solid #fddcb5;}
+.pr-chk input{cursor:pointer;width:14px;height:14px;accent-color:#ea6c00;}
+.pr-store{padding:6px 10px;min-width:60px;font-weight:700;color:#7a3200;border-right:1px solid #fddcb5;}
+.pr-vendor{padding:6px 10px;flex:1;color:#4a2000;border-right:1px solid #fddcb5;}
+.pr-amt{padding:6px 10px;min-width:75px;text-align:right;font-weight:700;color:#c25000;font-family:monospace;}
+.pending-empty{padding:14px;text-align:center;color:#556680;font-size:13px;}
+.pending-sec-title{padding:6px 13px;font-size:12px;font-weight:700;background:#fff0e0;color:#c25000;border-bottom:1px solid #fddcb5;letter-spacing:0.5px;}
+/* monthly form */
+.mform-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:14px;margin-bottom:12px;}
+.mfsec{border:1px solid #b7e0c9;border-radius:8px;overflow:hidden;background:#fff;}
+.mfsec-title{background:#1a6b3a;color:#fff;padding:7px 12px;font-size:12px;font-weight:600;}
+.mfrow{display:flex;align-items:center;border-bottom:1px solid #f0f5f2;padding:5px 12px;gap:8px;}
+.mfrow:last-child{border-bottom:none;}
+.mflbl{flex:1;font-size:11px;color:#2a3a2a;}
+.mfinp{width:105px;border:1px solid #c0cee4;border-radius:4px;padding:4px 7px;font-size:11px;text-align:right;background:#fff;}
+.mftot{background:#e2f4eb;font-weight:600;}
+.mfgrand{background:#b7e0c9;}
+/* sub tabs */
+.sub-tabs{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;}
+.stab{padding:5px 12px;font-size:11px;border-radius:5px;border:1px solid #c0cee4;background:#fff;color:#2a3060;cursor:pointer;}
+.stab.active{background:#1a6b3a;color:#fff;border-color:#1a6b3a;}
+.sub-page{display:none;}
+.sub-page.active{display:block;}
+/* payroll */
+.pay-store-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.pstab{padding:6px 16px;font-size:12px;font-weight:500;border-radius:6px;border:1px solid #c0cee4;background:#fff;color:#2a3060;cursor:pointer;}
+.pstab.active{background:#1a6b3a;color:#fff;border-color:#1a6b3a;}
+.pay-page{display:none;}
+.pay-page.active{display:block;}
+.emp-section{border:1px solid #b7e0c9;border-radius:8px;overflow:hidden;margin-bottom:12px;background:#fff;}
+.emp-title{background:#1a4731;color:#fff;padding:7px 12px;font-size:12px;font-weight:600;display:flex;justify-content:space-between;align-items:center;}
+.emp-title button{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:#fff;border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer;}
+.pay-header{font-size:11px;color:#4a5568;padding:8px 12px;background:#f7fafc;border-bottom:1px solid #f0f5f2;}
+.hint{font-size:13px;color:#445544;margin-bottom:8px;}
+.hint b{color:#1a6b3a;}
+</style>
+</head>
+<body>
+<div class="side-nav">
+  <div class="app-title">稅務系統</div>
+  <button class="active" onclick="nav('inv')">📄 發票</button>
+  <button onclick="nav('receipt')">💵 收據</button>
+  <button onclick="nav('storeview')">🏪 廠商叫貨</button>
+  <button onclick="nav('monthly')">🔄 收發票總覽</button>
+  <button onclick="nav('mform')">📋 每月表單</button>
+  <button onclick="nav('openinv')">🧾 梁平開發票</button>
+  <button onclick="nav('delivery')">📦 梁平出貨單</button>
+  <button onclick="nav('invno')">🔢 發票編號表</button>
+  <button onclick="nav('tax')">📊 稅務分析</button>
+  <button onclick="nav('payroll')">👥 薪資清冊</button>
+  <div style="margin-top:auto;padding:14px;">
+    <button id="save-all-btn" onclick="manualSave()" style="width:100%;padding:10px;background:#1a6b3a;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;">💾 儲存資料</button>
+    <div id="save-status" style="font-size:11px;color:rgba(255,255,255,0.7);text-align:center;margin-top:6px;"></div>
+    <div style="margin-top:8px;display:flex;gap:6px;">
+      <button onclick="exportBackup()" style="flex:1;padding:8px 4px;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;font-size:12px;cursor:pointer;" title="匯出完整備份檔">⬇ 備份</button>
+      <label style="flex:1;padding:8px 4px;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;font-size:12px;cursor:pointer;text-align:center;display:block;" title="載入備份檔">⬆ 還原<input type="file" accept=".json" onchange="importBackup(this)" style="display:none;"></label>
+    </div>
+  </div>
+</div>
+<div class="main-area">
+
+<!-- 發票 -->
+<div class="page active" id="pg-inv">
+<div class="page-inner">
+  <div class="upanel">
+    <div class="upanel-title">📷 上傳發票照片</div>
+    <div style="font-size:11px;color:#2a3060;margin-bottom:6px">第一步：選擇門市</div>
+    <div class="store-btns" id="store-btns"></div>
+    <div style="font-size:11px;color:#2a3060;margin-bottom:5px">第二步：上傳照片（可多張）</div>
+    <div class="dzone" id="dzone">
+      <input type="file" id="file-inp" accept="image/*" multiple onchange="handleFiles(this.files)">
+      <div style="font-size:24px">🖼️</div>
+      <div style="font-size:13px;font-weight:600;color:#4a7c6f" id="dz-lbl">請先選擇門市</div>
+      <div style="font-size:11px;color:#556655">點擊上傳或拖曳照片至此</div>
+    </div>
+    <div class="prev-grid" id="prev-grid"></div>
+    <button class="scan-btn" id="scan-btn" onclick="startScan()" disabled>🔍 開始辨識並加入表格</button>
+    <div class="scan-res" id="scan-res"></div>
+  </div>
+  <div class="ybox">
+    <div class="ybox-title">全年合計</div>
+    <div class="cards">
+      <div class="card"><div class="lbl">總筆數</div><div class="val" id="y-cnt">0</div></div>
+      <div class="card"><div class="lbl">銷售額</div><div class="val" id="y-sal">$0</div></div>
+      <div class="card"><div class="lbl">稅額</div><div class="val" id="y-tax">$0</div></div>
+      <div class="card"><div class="lbl">總計金額</div><div class="val" id="y-tot">$0</div></div>
+    </div>
+  </div>
+  <div class="mtabs" id="inv-mtabs"></div>
+  <div class="cards">
+    <div class="card"><div class="lbl">本月筆數</div><div class="val" id="m-cnt">0</div></div>
+    <div class="card"><div class="lbl">本月銷售額</div><div class="val" id="m-sal">$0</div></div>
+    <div class="card"><div class="lbl">本月稅額</div><div class="val" id="m-tax">$0</div></div>
+    <div class="card"><div class="lbl">本月總計</div><div class="val" id="m-tot">$0</div></div>
+  </div>
+  <div class="hint">💡 輸入<b>總計金額</b>自動回推銷售額與稅額；免稅時稅額為0</div>
+  <div class="toolbar">
+    <button class="btn green" onclick="addInvRow()">＋ 手動新增</button>
+    <button class="btn excel" onclick="exportInvXLSX()">⬇ 本月 Excel</button>
+    <button class="btn excel" onclick="exportAllInvXLSX()">⬇ 全年 Excel</button>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>門市</th><th>發票號碼</th><th>日期</th><th>銷售額</th><th>稅額</th><th>總計金額</th><th>發票類別</th><th>已取得</th><th>免稅</th><th style="min-width:135px">備註（廠商）</th><th>顏色</th><th></th></tr></thead>
+      <tbody id="inv-body"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- 收據 -->
+<div class="page" id="pg-receipt">
+<div class="page-inner">
+  <div class="cards">
+    <div class="card"><div class="lbl">全年筆數</div><div class="val" id="r-cnt">0</div></div>
+    <div class="card"><div class="lbl">全年總金額</div><div class="val" id="r-tot">$0</div></div>
+  </div>
+  <div class="toolbar">
+    <button class="btn green" onclick="addRecRow()">＋ 新增</button>
+    <button class="btn excel" onclick="exportRecXLSX()">⬇ Excel</button>
+  </div>
+  <div class="tbl-wrap">
+    <table><thead><tr><th>#</th><th>門市</th><th>日期</th><th>總金額</th><th>備註</th><th></th></tr></thead>
+    <tbody id="rec-body"></tbody></table>
+  </div>
+</div>
+</div>
+
+<!-- 廠商管理 Modal -->
+<div id="vendor-mgr-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;width:500px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+    <div style="background:#1a4731;color:#fff;padding:14px 18px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:14px;font-weight:700;">⚙️ 廠商目錄管理</span>
+      <button onclick="closeVendorMgr()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:0 4px;">✕</button>
+    </div>
+    <div style="padding:16px;overflow-y:auto;flex:1;">
+      <div style="margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:#1a4731;margin-bottom:8px;">➕ 新增廠商</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input id="new-vendor-name" placeholder="廠商名稱" style="flex:1;min-width:120px;border:1px solid #d4eddf;border-radius:5px;padding:7px 10px;font-size:13px;outline:none;"
+            onkeydown="if(event.key==='Enter')addVendor()">
+          <select id="new-vendor-type" style="border:1px solid #d4eddf;border-radius:5px;padding:7px 10px;font-size:13px;outline:none;">
+            <option value="taxable">應稅</option>
+            <option value="exempt">免稅</option>
+          </select>
+          <button onclick="addVendor()" class="btn green" style="white-space:nowrap;">新增</button>
+        </div>
+      </div>
+      <div style="margin-bottom:8px;font-size:12px;font-weight:700;color:#1a4731;">📋 應稅廠商</div>
+      <div id="vmgr-tax" style="margin-bottom:14px;"></div>
+      <div style="margin-bottom:8px;font-size:12px;font-weight:700;color:#1a4731;">📋 免稅廠商</div>
+      <div id="vmgr-ex"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 廠商叫貨 -->
+<div class="page" id="pg-storeview">
+<div class="page-inner">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:13px;font-weight:600;color:#1a4731;">月份：</span>
+      <select id="sv-month" style="border:1px solid #d4eddf;border-radius:6px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;" onchange="renderStoreView()">
+        <option value="0">1月</option><option value="1">2月</option><option value="2">3月</option>
+        <option value="3">4月</option><option value="4">5月</option><option value="5">6月</option>
+        <option value="6">7月</option><option value="7">8月</option><option value="8">9月</option>
+        <option value="9">10月</option><option value="10">11月</option><option value="11">12月</option>
+      </select>
+    </div>
+    <button class="btn" onclick="showVendorMgr()" style="font-size:13px;">⚙️ 管理廠商目錄</button>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;" id="sv-store-tabs"></div>
+  <div id="sv-content"></div>
+</div>
+</div>
+
+<!-- 月份作業 -->
+<div class="page" id="pg-monthly">
+<div class="page-inner">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+    <span style="font-size:14px;font-weight:700;color:#1a4731;">月份：</span>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;" id="ml-month-tabs"></div>
+    <button class="btn" onclick="mlExpandAll()" style="margin-left:auto;font-size:12px;">全部展開</button>
+    <button class="btn" onclick="mlCollapseAll()" style="font-size:12px;">全部收起</button>
+  </div>
+  <div style="background:#f0faf4;border:1px solid #d4eddf;border-radius:8px;padding:8px 14px;margin-bottom:14px;font-size:12px;color:#1a4731;display:flex;flex-wrap:wrap;gap:12px;">
+    <span>點廠商名稱展開各店明細</span>
+    <span style="color:#b7e0c9;">｜</span>
+    <span>🟩 已收到 ｜ 🟧 下月才收 ｜ <b style="color:#c62828;">⤵️</b> 算次月</span>
+  </div>
+  <div style="background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.05);overflow:hidden;">
+    <div style="background:#2d5a3d;color:#fff;padding:8px 16px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center;">
+      <span>📋 應稅廠商</span>
+      <span id="ml-tax-total" style="font-size:12px;opacity:0.9;"></span>
+    </div>
+    <div id="ml-tax-list"></div>
+    <div style="background:#1a4731;color:#fff;padding:8px 16px;font-size:13px;font-weight:700;border-top:2px solid #e8f5ee;display:flex;justify-content:space-between;align-items:center;">
+      <span>📋 免稅廠商</span>
+      <span id="ml-ex-total" style="font-size:12px;opacity:0.9;"></span>
+    </div>
+    <div id="ml-ex-list"></div>
+    <div style="background:#1a6b3a;color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;border-top:2px solid #145a2e;">
+      <span style="font-size:13px;opacity:0.85;">本月實際收到發票總金額</span>
+      <span id="ml-grand-total" style="font-size:20px;font-weight:700;font-family:monospace;">$0</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 每月表單 -->
+<div class="page" id="pg-mform">
+<div class="page-inner">
+  <div class="mtabs" id="mf-mtabs"></div>
+  <div class="toolbar"><button class="btn excel" onclick="exportMformXLSX()">⬇ Excel</button></div>
+  <div class="mform-grid" id="mform-grid"></div>
+</div>
+</div>
+
+<!-- 梁平開發票 -->
+<div class="page" id="pg-openinv">
+<div class="page-inner">
+  <div class="mtabs" id="oi-mtabs"></div>
+  <div class="cards">
+    <div class="card"><div class="lbl">本月總計</div><div class="val" id="oi-tot">$0</div></div>
+    <div class="card"><div class="lbl">本月稅額</div><div class="val" id="oi-tax">$0</div></div>
+  </div>
+  <div class="toolbar">
+    <button class="btn green" onclick="addOiRow()">＋ 新增</button>
+    <button class="btn excel" onclick="exportOiXLSX()">⬇ Excel</button>
+  </div>
+  <div class="tbl-wrap">
+    <table><thead><tr><th>#</th><th>發票號碼</th><th>日期</th><th>買受人</th><th>品項</th><th>銷售額</th><th>稅額</th><th>總計金額</th><th>備註</th><th></th></tr></thead>
+    <tbody id="oi-body"></tbody></table>
+  </div>
+</div>
+</div>
+
+<!-- 梁平出貨單 -->
+<div class="page" id="pg-delivery">
+<div class="page-inner">
+  <div class="mtabs" id="dv-mtabs"></div>
+  <div class="toolbar">
+    <button class="btn green" onclick="addDvRow()">＋ 新增</button>
+    <button class="btn excel" onclick="exportDvXLSX()">⬇ Excel</button>
+  </div>
+  <div class="tbl-wrap">
+    <table><thead><tr><th>#</th><th>日期</th><th>配送門市</th><th>品項</th><th>數量</th><th>單價</th><th>金額</th><th>對應發票號碼</th><th>備註</th><th></th></tr></thead>
+    <tbody id="dv-body"></tbody></table>
+  </div>
+</div>
+</div>
+
+<!-- 發票編號表 -->
+<div class="page" id="pg-invno">
+<div class="page-inner">
+  <div class="mtabs" id="invno-mtabs"></div>
+  <div class="hint">💡 自動從發票頁抓取應稅發票，依<b>發票類別</b>再依<b>日期</b>排序</div>
+  <div class="toolbar">
+    <button class="btn green" onclick="refreshInvno()">🔄 重新抓取</button>
+    <button class="btn excel" onclick="exportInvnoXLSX()">⬇ Excel</button>
+  </div>
+  <div class="tbl-wrap">
+    <table><thead><tr><th>#</th><th>門市</th><th>發票類別</th><th>發票號碼</th><th>日期</th><th>總計金額</th><th>備註</th></tr></thead>
+    <tbody id="invno-body"></tbody></table>
+  </div>
+</div>
+</div>
+
+<!-- 稅務分析 -->
+<div class="page" id="pg-tax">
+<div class="page-inner">
+  <div class="sub-tabs">
+    <button class="stab active" onclick="stab('alloc',this)">梁平發票額度統計</button>
+    <button class="stab" onclick="stab('istat',this)">梁平進項統計表</button>
+    <button class="stab" onclick="stab('vat',this)">營業稅金比對</button>
+    <button class="stab" onclick="stab('cit',this)">營所稅統計</button>
+  </div>
+  <div class="sub-page active" id="sp-alloc">
+    <div class="cards"><div class="card"><div class="lbl">全年發票總額</div><div class="val" id="alloc-tot">$0</div></div></div>
+    <div class="toolbar"><button class="btn excel" onclick="exportAllocXLSX()">⬇ Excel</button></div>
+    <div class="tbl-wrap"><table><thead><tr><th>月份</th><th>梁平</th><th>梁鑫</th><th>府中</th><th>景新</th><th>合計</th></tr></thead><tbody id="alloc-body"></tbody></table></div>
+  </div>
+  <div class="sub-page" id="sp-istat">
+    <div class="toolbar"><button class="btn excel" onclick="exportIstatXLSX()">⬇ Excel</button></div>
+    <div class="tbl-wrap"><table><thead><tr><th>月份</th><th>應稅銷售額</th><th>應稅稅額</th><th>應稅總計</th><th>免稅金額</th><th>0稅額</th><th>本月合計</th></tr></thead><tbody id="istat-body"></tbody></table></div>
+  </div>
+  <div class="sub-page" id="sp-vat">
+    <div class="toolbar"><button class="btn excel" onclick="exportVatXLSX()">⬇ Excel</button></div>
+    <div class="tbl-wrap"><table><thead><tr><th>期別</th><th>進項稅額</th><th>銷項稅額</th><th>差額</th><th>應繳/退稅</th></tr></thead><tbody id="vat-body"></tbody></table></div>
+  </div>
+  <div class="sub-page" id="sp-cit">
+    <div class="toolbar"><button class="btn excel" onclick="exportCitXLSX()">⬇ Excel</button></div>
+    <div class="tbl-wrap"><table><thead><tr><th>月份</th><th>收入合計</th><th>成本合計</th><th>毛利</th><th>費用合計</th><th>稅前淨利</th><th>預估稅額(20%)</th></tr></thead><tbody id="cit-body"></tbody></table></div>
+  </div>
+</div>
+</div>
+
+<!-- 薪資清冊 -->
+<div class="page" id="pg-payroll">
+<div class="page-inner">
+  <div class="pay-store-tabs">
+    <button class="pstab active" onclick="payStore('梁平',this)">梁平</button>
+    <button class="pstab" onclick="payStore('梁鑫',this)">梁鑫</button>
+    <button class="pstab" onclick="payStore('府中',this)">府中</button>
+    <button class="pstab" onclick="payStore('景新',this)">景新</button>
+    <button class="pstab" style="background:#eef2fb;color:#1a5276;border-color:#b0c8e4" onclick="payStore('emp',this)">👤 員工資料管理</button>
+  </div>
+
+  <!-- 員工資料管理 -->
+  <div class="pay-page active" id="pp-emp">
+    <div class="hint">💡 在此設定各門市員工基本資料，薪資清冊每月自動帶入</div>
+    <div class="pay-store-tabs" style="margin-bottom:8px">
+      <button class="pstab active" onclick="empStore('梁平',this)">梁平</button>
+      <button class="pstab" onclick="empStore('梁鑫',this)">梁鑫</button>
+      <button class="pstab" onclick="empStore('府中',this)">府中</button>
+      <button class="pstab" onclick="empStore('景新',this)">景新</button>
+    </div>
+    <div class="toolbar">
+      <button class="btn green" onclick="addEmpRow()">＋ 新增員工</button>
+      <button class="btn excel" onclick="exportEmpXLSX()">⬇ Excel</button>
+    </div>
+    <div class="tbl-wrap">
+      <table><thead><tr><th>#</th><th>職稱</th><th>姓名</th><th>身份證字號</th><th style="min-width:160px">住址</th><th>底薪</th><th>投保薪資</th><th>備註</th><th></th></tr></thead>
+      <tbody id="emp-body"></tbody></table>
+    </div>
+  </div>
+
+  <!-- 各門市薪資清冊 -->
+  <div class="pay-page" id="pp-梁平"><div id="pay-梁平"></div></div>
+  <div class="pay-page" id="pp-梁鑫"><div id="pay-梁鑫"></div></div>
+  <div class="pay-page" id="pp-府中"><div id="pay-府中"></div></div>
+  <div class="pay-page" id="pp-景新"><div id="pay-景新"></div></div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ===== CONSTANTS =====
+const STORES=['新生北','泉州','新莊','鑫耀鑫','梁鑫','鑫營','府中','景新','天津','大直','心惦','幸福','福城','梁平'];
+const OPEN_STORES=['梁平','梁鑫','府中','景新'];
+const INV_TYPES=['大A4','小A4','三聯式','手寫發票','傳統發票','電子發票','0稅額'];
+const MONTHS=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+const OBTAINED=['O','－','待確認'];
+const EXEMPT=['－','免稅'];
+const GRP=[{n:'紅',c:'g0'},{n:'黃',c:'g1'},{n:'藍',c:'g2'},{n:'綠',c:'g3'},{n:'紫',c:'g4'},{n:'橘',c:'g5'},{n:'青',c:'g6'},{n:'橙',c:'g7'},{n:'粉',c:'g8'},{n:'草綠',c:'g9'},{n:'無',c:''}];
+const NOTE_LIST=['瑋茹(強巨)','宥杏','大新','旺博','松良行(立琴)','東昇(安食達)','昇威','振源/蛋','新一/蛋','名陽/米','名陽/應稅','范記','天官','豆香','春豐','淳香','順正','鼎生(免洗+雜貨)','越豐','節能鍋','匯豐/租賃','歐力士/租賃','廚餘','廚餘(三間央廚)','消毒','系統費(自行列印)','Gomaji-菜','大武/魚丸','大賀/消毒','雞爺爺(鮮據點)'];
+const TAX_V=['菜 (瑋茹)','免洗 (有厲-府中拿)','免洗 (昇威)','免洗 (越豐-梁鑫拿)','雜貨 (名陽-府中拿)','雜貨 (松良/鑫營拿)','雜貨 (東昇/幸福拿)','雜貨+免洗 (鼎生-福城拿)','蛋豆腐 (范記-府中拿)','豆腐 (福城)','豆漿','冷氣 (泉州拿)','大賀消毒 (府中拿)','佑康消毒 (天津拿)','魚丸 (新生北拿)','廚餘費/財伯','雞肉 (順正/應稅-新生北拿)'];
+// 算次月的廠商
+const NEXT_MONTH_V=new Set(['菜 (瑋茹)','免洗 (越豐-梁鑫拿)','雜貨 (東昇/幸福拿)','雜貨+免洗 (鼎生-福城拿)']);
+const EX_V=['蛋 (振源-梁鑫拿)','蛋 (竹一-福城拿)','雞肉 (淳香/免稅-新生北拿)','雞肉 (雞爺爺/免稅)','菜 (農良Gomaji)','菜 (宥杏)','菜 (大新-福城/開景新)'];
+const INV_ITEMS=['電費','電信費','瓦斯','Uber','熊貓','租賃(汽車)','清運費'];
+const COST_ITEMS=['租金','薪資','伙食費','勞保','健保','勞退'];
+const STORE_INFO={
+  '梁平':{full:'梁平有限公司',tax:'94059215',health:'153981367'},
+  '梁鑫':{full:'梁鑫雞肉飯專門店',tax:'72933369',health:'147051849'},
+  '府中':{full:'府中雞肉飯專門店',tax:'87317440',health:'149548701'},
+  '景新':{full:'景新雞肉飯專門店',tax:'87475094',health:'150508893'},
+};
+
+// ===== DATA =====
+let curInvM=3,curColM=3,curMfM=3,curOiM=3,curDvM=3,curInvnoM=3;
+let selStore='',pendingFiles=[];
+let invData={},colData={},mfData={},oiData={},dvData={};
+let recData=[{store:'梁平',date:'2026-04-25',total:400,note:'印章費（順安鎖匙行）'}];
+// empData: {store: [{title,name,id,addr,base,insured,note}]}
+let empData={'梁平':[],'梁鑫':[],'府中':[
+  {title:'服務員',name:'羅麗琴',id:'A224315636',addr:'台北市大安區黎元里12鄰安居街118巷19號2樓',base:29500,insured:40100,note:''},
+  {title:'服務員',name:'廖畢凱',id:'F124934090',addr:'新北市板橋區仁翠里13鄰四維路291巷4弄2號2樓',base:29500,insured:42000,note:''},
+  {title:'服務員',name:'黃祺峰',id:'F124496586',addr:'新北市新莊區西盛里17鄰新樹路801號12樓',base:29500,insured:40100,note:''},
+  {title:'服務員',name:'林美貞',id:'F228560883',addr:'新北市中和區碧河里12鄰連城路249巷4之3號',base:29500,insured:40100,note:''},
+  {title:'服務員',name:'洪韡芳',id:'F229212500',addr:'新北市中和區國華里8鄰國光街116之4號',base:29500,insured:40100,note:''},
+  {title:'服務員',name:'鍾競儀',id:'F229112176',addr:'桃園市龜山區龍華里12鄰萬壽路一段388之4號9樓',base:29500,insured:40100,note:''},
+  {title:'服務員',name:'薛蔭霆',id:'F127824868',addr:'新北市板橋區溪福里25鄰金門街327巷2號6樓',base:29500,insured:38200,note:''},
+  {title:'服務員',name:'許文瑜',id:'F228671443',addr:'新北市土城區延壽里2鄰延壽路111巷11號2樓',base:29500,insured:40100,note:''},
+  {title:'服務員',name:'郭書菱',id:'F230220090',addr:'新北市土城區清和里6鄰青雲路483巷11弄18號3樓',base:29500,insured:40100,note:''},
+  {title:'服務員',name:'張美鳳',id:'J220737509',addr:'新竹縣關西鎮東平里7鄰大旱坑13號之1',base:29500,insured:38200,note:''},
+  {title:'服務員',name:'賴欣美',id:'H224475947',addr:'新北市鶯歌區大湖里24鄰大湖路391巷7弄6號',base:29500,insured:38200,note:''},
+  {title:'服務員',name:'朱婉琳',id:'F228011732',addr:'新北市土城區沛陂里20鄰民族街6巷12號四樓',base:29500,insured:38200,note:''},
+  {title:'服務員',name:'林豐源',id:'F127659889',addr:'新北市泰山區三腳里15鄰忠孝街41巷3號二樓',base:29500,insured:38200,note:''},
+],'景新':[]};
+// payData: {store: {month: [{...emp fields, flex, leave, ot, food}]}}
+let payData={};
+OPEN_STORES.forEach(s=>{payData[s]={};for(let m=0;m<12;m++)payData[s][m]=[];});
+let curPayStore='梁平',curEmpStore='梁平';
+let curPayMonth={梁平:3,梁鑫:3,府中:3,景新:3};
+
+for(let m=0;m<12;m++){
+  invData[m]=[];oiData[m]=[];dvData[m]=[];
+  colData[m]={taxable:{},exempt:{},header:{}};
+  TAX_V.forEach(v=>colData[m].taxable[v]={});
+  EX_V.forEach(v=>colData[m].exempt[v]={});
+  STORES.forEach(s=>colData[m].header[s]={declared:0,adj:0});
+  mfData[m]={};
+  OPEN_STORES.forEach(s=>{mfData[m][s]={};[...INV_ITEMS,...COST_ITEMS].forEach(i=>mfData[m][s][i]=0);});
+}
+invData[3]=[
+  {store:'新生北',inv:'YN-99061929',date:'2026-04-25',sales:952,tax:48,total:1000,type:'電子發票',obtained:'O',exempt:'－',note:'',grp:''},
+  {store:'新生北',inv:'YN-99060032',date:'2026-04-22',sales:952,tax:48,total:1000,type:'電子發票',obtained:'O',exempt:'－',note:'',grp:''},
+  {store:'新生北',inv:'YN-90643466',date:'2026-04-28',sales:952,tax:48,total:1000,type:'電子發票',obtained:'O',exempt:'－',note:'',grp:''},
+  {store:'梁平',inv:'XV-38157601',date:'2026-04-23',sales:6000,tax:300,total:6300,type:'三聯式',obtained:'O',exempt:'－',note:'製冰桶護底（柏翰實業）',grp:''},
+];
+
+const fmt=n=>'$'+Number(n||0).toLocaleString();
+const fmtN=n=>Number(n||0).toLocaleString();
+const calcST=(t,ex)=>{const v=Number(t)||0;if(ex==='免稅')return{s:v,t:0};const s=Math.round(v/1.05);return{s,t:v-s};};
+
+// ===== 儲存 / 載入 =====
+function saveAll(){
+  try{
+    localStorage.setItem('fztax_inv', JSON.stringify(invData));
+    localStorage.setItem('fztax_col', JSON.stringify(colData));
+    localStorage.setItem('fztax_rec', JSON.stringify(recData));
+    localStorage.setItem('fztax_mf',  JSON.stringify(mfData));
+    localStorage.setItem('fztax_oi',  JSON.stringify(oiData));
+    localStorage.setItem('fztax_dv',  JSON.stringify(dvData));
+    localStorage.setItem('fztax_emp', JSON.stringify(empData));
+    localStorage.setItem('fztax_pay', JSON.stringify(payData));
+    localStorage.setItem('fztax_sv',  JSON.stringify(svData));
+    localStorage.setItem('fztax_vdir',JSON.stringify(vendorDir));
+    // 振源/名陽
+    const zy={lx:document.getElementById('zy-lx')?.value||'',fc:document.getElementById('zy-fc')?.value||'',jx:document.getElementById('zy-jx')?.value||''};
+    const my={lx:document.getElementById('my-lx')?.value||'',fc:document.getElementById('my-fc')?.value||'',jx:document.getElementById('my-jx')?.value||''};
+    localStorage.setItem('fztax_zy', JSON.stringify(zy));
+    localStorage.setItem('fztax_my', JSON.stringify(my));
+    return true;
+  }catch(e){console.error(e);return false;}
+}
+function loadAll(){
+  try{
+    const inv=localStorage.getItem('fztax_inv'); if(inv) invData=JSON.parse(inv);
+    const col=localStorage.getItem('fztax_col'); if(col) colData=JSON.parse(col);
+    const rec=localStorage.getItem('fztax_rec'); if(rec) recData=JSON.parse(rec);
+    const mf=localStorage.getItem('fztax_mf');  if(mf)  mfData=JSON.parse(mf);
+    const oi=localStorage.getItem('fztax_oi');  if(oi)  oiData=JSON.parse(oi);
+    const dv=localStorage.getItem('fztax_dv');  if(dv)  dvData=JSON.parse(dv);
+    const emp=localStorage.getItem('fztax_emp');if(emp) empData=JSON.parse(emp);
+    const pay=localStorage.getItem('fztax_pay');if(pay) payData=JSON.parse(pay);
+    const sv=localStorage.getItem('fztax_sv');  if(sv)  svData=JSON.parse(sv);
+    const vdir=localStorage.getItem('fztax_vdir');if(vdir) vendorDir=JSON.parse(vdir);
+  }catch(e){console.error(e);}
+}
+function loadZyMy(){
+  try{
+    const zy=JSON.parse(localStorage.getItem('fztax_zy')||'{}');
+    const my=JSON.parse(localStorage.getItem('fztax_my')||'{}');
+    if(zy.lx!==undefined&&document.getElementById('zy-lx'))document.getElementById('zy-lx').value=zy.lx;
+    if(zy.fc!==undefined&&document.getElementById('zy-fc'))document.getElementById('zy-fc').value=zy.fc;
+    if(zy.jx!==undefined&&document.getElementById('zy-jx'))document.getElementById('zy-jx').value=zy.jx;
+    if(my.lx!==undefined&&document.getElementById('my-lx'))document.getElementById('my-lx').value=my.lx;
+    if(my.fc!==undefined&&document.getElementById('my-fc'))document.getElementById('my-fc').value=my.fc;
+    if(my.jx!==undefined&&document.getElementById('my-jx'))document.getElementById('my-jx').value=my.jx;
+    calcZhenyuan();calcMingyang();
+  }catch(e){}
+}
+// 每次輸入自動存
+function autoSave(){ saveAll(); }
+function exportBackup(){
+  const backup={
+    version:1,
+    date:new Date().toISOString(),
+    invData,colData,recData,mfData,oiData,dvData,empData,payData,svData,vendorDir,
+    zy:{lx:document.getElementById('zy-lx')?.value||'',fc:document.getElementById('zy-fc')?.value||'',jx:document.getElementById('zy-jx')?.value||''},
+    my:{lx:document.getElementById('my-lx')?.value||'',fc:document.getElementById('my-fc')?.value||'',jx:document.getElementById('my-jx')?.value||''},
+  };
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  const d=new Date();
+  a.download=`稅務系統備份_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  const status=document.getElementById('save-status');
+  if(status) status.textContent='備份已下載 ✓';
+  setTimeout(()=>{if(status)status.textContent='';},2500);
+}
+function importBackup(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      if(!d.version)throw new Error('格式錯誤');
+      if(!confirm(`確定要還原 ${d.date?new Date(d.date).toLocaleString():'備份'} 的資料？\n目前的資料將被覆蓋！`))return;
+      if(d.invData) invData=d.invData;
+      if(d.colData) colData=d.colData;
+      if(d.recData) recData=d.recData;
+      if(d.mfData)  mfData=d.mfData;
+      if(d.oiData)  oiData=d.oiData;
+      if(d.dvData)  dvData=d.dvData;
+      if(d.empData) empData=d.empData;
+      if(d.payData) payData=d.payData;
+      if(d.svData)  svData=d.svData;
+      if(d.vendorDir) vendorDir=d.vendorDir;
+      saveAll();
+      // 還原振源名陽
+      if(d.zy){
+        if(document.getElementById('zy-lx'))document.getElementById('zy-lx').value=d.zy.lx||'';
+        if(document.getElementById('zy-fc'))document.getElementById('zy-fc').value=d.zy.fc||'';
+        if(document.getElementById('zy-jx'))document.getElementById('zy-jx').value=d.zy.jx||'';
+        calcZhenyuan();
+      }
+      if(d.my){
+        if(document.getElementById('my-lx'))document.getElementById('my-lx').value=d.my.lx||'';
+        if(document.getElementById('my-fc'))document.getElementById('my-fc').value=d.my.fc||'';
+        if(document.getElementById('my-jx'))document.getElementById('my-jx').value=d.my.jx||'';
+        calcMingyang();
+      }
+      // 重新渲染目前頁面
+      renderInv();
+      const status=document.getElementById('save-status');
+      if(status){status.textContent='✓ 還原成功！';setTimeout(()=>{status.textContent='';},3000);}
+      alert('資料還原成功！');
+    }catch(err){
+      alert('備份檔案格式錯誤，無法還原。\n'+err.message);
+    }
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+function manualSave(){
+  const ok=saveAll();
+  const btn=document.getElementById('save-all-btn');
+  const status=document.getElementById('save-status');
+  if(ok){
+    if(btn){btn.textContent='✓ 已儲存';btn.style.background='#145a2e';}
+    if(status){const now=new Date();status.textContent=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+' 儲存成功';}
+    setTimeout(()=>{if(btn){btn.textContent='💾 儲存資料';btn.style.background='#ea6c00';}},2000);
+  }
+}
+
+// ===== NAV =====
+const PMAP={inv:0,receipt:1,storeview:2,monthly:3,mform:4,openinv:5,delivery:6,invno:7,tax:8,payroll:9};
+function nav(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.side-nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pg-'+id).classList.add('active');
+  document.querySelectorAll('.side-nav button')[PMAP[id]].classList.add('active');
+  const r={inv:renderInv,receipt:renderRec,monthly:renderMonthlyInit,storeview:renderStoreViewInit,mform:renderMform,openinv:renderOi,delivery:renderDv,invno:renderInvno,tax:renderTax,payroll:()=>renderPayStore(curPayStore)};
+  if(r[id])r[id]();
+}
+
+// ===== MONTH TABS =====
+function buildMtabs(cid,cur,hasFn,setCur,rFn){
+  const el=document.getElementById(cid);if(!el)return;el.innerHTML='';
+  MONTHS.forEach((m,i)=>{
+    const b=document.createElement('button');
+    b.className='mtab'+(i===cur?' active':'')+(hasFn(i)?' has':'');
+    b.textContent=m;b.onclick=()=>{setCur(i);buildMtabs(cid,i,hasFn,setCur,rFn);rFn();};
+    el.appendChild(b);
+  });
+}
+
+// ===== STORE SELECTOR =====
+function buildStoreSel(){
+  const el=document.getElementById('store-btns');el.innerHTML='';
+  STORES.forEach(s=>{const b=document.createElement('button');b.className='sbtn'+(s===selStore?' sel':'');b.textContent=s;b.onclick=()=>{selStore=s;buildStoreSel();document.getElementById('dz-lbl').textContent='門市：'+s;document.getElementById('dzone').classList.add('on');updScanBtn();};el.appendChild(b);});
+}
+function updScanBtn(){document.getElementById('scan-btn').disabled=!(selStore&&pendingFiles.filter(f=>f).length);}
+
+// ===== UPLOAD =====
+function handleFiles(files){
+  if(!selStore){alert('請先選擇門市！');return;}
+  Array.from(files).forEach(f=>{
+    if(!f.type.startsWith('image/'))return;
+    const i=pendingFiles.length;pendingFiles.push(f);
+    const g=document.getElementById('prev-grid');
+    const d=document.createElement('div');d.className='prev-item';d.id='pi-'+i;
+    d.innerHTML=`<img src="${URL.createObjectURL(f)}"><div class="pst" id="pst-${i}"></div><button class="prm" onclick="rmPrev(${i})">✕</button>`;
+    g.appendChild(d);
+  });updScanBtn();
+}
+function rmPrev(i){pendingFiles[i]=null;const e=document.getElementById('pi-'+i);if(e)e.remove();updScanBtn();}
+async function startScan(){
+  const btn=document.getElementById('scan-btn');btn.disabled=true;btn.textContent='辨識中...';
+  let ok=0,fail=0;
+  for(let i=0;i<pendingFiles.length;i++){
+    const f=pendingFiles[i];if(!f)continue;
+    const pst=document.getElementById('pst-'+i);if(pst){pst.className='pst sc';pst.textContent='辨識中';}
+    try{
+      const b64=await toB64(f);const r=await callClaude(b64,f.type);
+      if(r){invData[curInvM].push({store:selStore,inv:r.inv||'',date:r.date||new Date().toISOString().slice(0,10),sales:Number(r.sales)||0,tax:Number(r.tax)||0,total:Number(r.total)||0,type:r.type||'電子發票',obtained:'O',exempt:r.exempt||'－',note:r.note||'',grp:''});ok++;if(pst){pst.className='pst ok';pst.textContent='✓';}}
+      else{fail++;if(pst){pst.className='pst er';pst.textContent='失敗';}}
+    }catch{fail++;if(pst){pst.className='pst er';pst.textContent='錯誤';}}
+  }
+  renderInv();
+  const res=document.getElementById('scan-res');res.className='scan-res show';
+  res.innerHTML=`✅ 完成：加入 <b>${ok}</b> 筆（${selStore}）${fail?`，失敗 ${fail} 張`:''}`;
+  btn.textContent='🔍 開始辨識並加入表格';btn.disabled=false;
+  pendingFiles=[];document.getElementById('prev-grid').innerHTML='';updScanBtn();
+}
+const toB64=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(f);});
+async function callClaude(b64,mt){
+  const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mt,data:b64}},{type:'text',text:'辨識台灣發票，回傳JSON（不含其他文字）：{"inv":"字軌號碼","date":"YYYY-MM-DD","sales":銷售額,"tax":稅額,"total":總計,"type":"電子發票/三聯式/大A4/小A4/手寫發票/傳統發票/0稅額","exempt":"－或免稅","note":"廠商名稱"}'}]}]})});
+  const d=await resp.json();
+  try{return JSON.parse(d.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim());}catch{return null;}
+}
+
+// ===== INVOICE =====
+function makeNoteInp(i,val){
+  const w=document.createElement('div');w.className='note-wrap';
+  const inp=document.createElement('input');inp.type='text';inp.value=val||'';inp.placeholder='廠商/備註';
+  const d=document.createElement('div');d.className='note-drop';
+  const show=q=>{const f=NOTE_LIST.filter(n=>n.toLowerCase().includes((q||'').toLowerCase()));if(!f.length){d.classList.remove('show');return;}d.innerHTML=f.map(n=>`<div class="note-opt">${n}</div>`).join('');d.classList.add('show');d.querySelectorAll('.note-opt').forEach(o=>{o.onclick=()=>{inp.value=o.textContent;invData[curInvM][i].note=o.textContent;d.classList.remove('show');};});};
+  inp.oninput=()=>show(inp.value);inp.onfocus=()=>show(inp.value);inp.onblur=()=>setTimeout(()=>d.classList.remove('show'),150);inp.onchange=()=>{invData[curInvM][i].note=inp.value;};
+  w.appendChild(inp);w.appendChild(d);return w;
+}
+function renderInv(){
+  buildMtabs('inv-mtabs',curInvM,i=>invData[i].length>0,v=>{curInvM=v;},renderInv);
+  const rows=invData[curInvM],tbody=document.getElementById('inv-body');tbody.innerHTML='';
+  let ms=0,mt=0,mT=0;
+  rows.forEach((r,i)=>{
+    ms+=Number(r.sales)||0;mt+=Number(r.tax)||0;mT+=Number(r.total)||0;
+    const tr=document.createElement('tr');if(r.grp)tr.className=r.grp;
+    const so=STORES.map(s=>`<option ${r.store===s?'selected':''}>${s}</option>`).join('');
+    const to=INV_TYPES.map(t=>`<option ${r.type===t?'selected':''}>${t}</option>`).join('');
+    const oo=OBTAINED.map(o=>`<option ${r.obtained===o?'selected':''}>${o}</option>`).join('');
+    const eo=EXEMPT.map(e=>`<option ${r.exempt===e?'selected':''}>${e}</option>`).join('');
+    const go=GRP.map(g=>`<option value="${g.c}" ${r.grp===g.c?'selected':''}>${g.n}</option>`).join('');
+    tr.innerHTML=`<td style="color:#556680;font-size:10px;text-align:center">${i+1}</td>
+      <td><select onchange="ui(${i},'store',this.value)">${so}</select></td>
+      <td><input value="${r.inv||''}" placeholder="字軌號碼" onchange="ui(${i},'inv',this.value)"></td>
+      <td><input type="date" value="${r.date}" onchange="ui(${i},'date',this.value)"></td>
+      <td><input type="number" value="${r.sales}" min="0" onchange="ui(${i},'sales',this.value)"></td>
+      <td><input type="number" value="${r.tax}" readonly></td>
+      <td><input type="number" value="${r.total}" min="0" onchange="uiTotal(${i},this.value)"></td>
+      <td><select onchange="ui(${i},'type',this.value)">${to}</select></td>
+      <td><select onchange="ui(${i},'obtained',this.value)">${oo}</select></td>
+      <td><select onchange="uiExempt(${i},this.value)">${eo}</select></td>
+      <td class="nc"></td>
+      <td><select onchange="uiGrp(${i},this.value)">${go}</select></td>
+      <td><button class="del" onclick="delInv(${i})">✕</button></td>`;
+    tbody.appendChild(tr);tr.querySelector('.nc').appendChild(makeNoteInp(i,r.note));
+  });
+  document.getElementById('m-cnt').textContent=rows.length;
+  document.getElementById('m-sal').textContent=fmt(ms);
+  document.getElementById('m-tax').textContent=fmt(mt);
+  document.getElementById('m-tot').textContent=fmt(mT);
+  updYS();
+}
+function ui(i,k,v){invData[curInvM][i][k]=v;updYS();}
+function uiTotal(i,v){const r=invData[curInvM][i];r.total=Number(v)||0;const{s,t}=calcST(r.total,r.exempt);r.sales=s;r.tax=t;renderInv();}
+function uiExempt(i,v){const r=invData[curInvM][i];r.exempt=v;const{s,t}=calcST(r.total,v);r.sales=s;r.tax=t;renderInv();}
+function uiGrp(i,v){invData[curInvM][i].grp=v;const rows=document.getElementById('inv-body').querySelectorAll('tr');if(rows[i])rows[i].className=v;}
+function delInv(i){invData[curInvM].splice(i,1);renderInv();}
+function addInvRow(){const mm=String(curInvM+1).padStart(2,'0');invData[curInvM].push({store:selStore||STORES[0],inv:'',date:`2026-${mm}-01`,sales:0,tax:0,total:0,type:'電子發票',obtained:'O',exempt:'－',note:'',grp:''});renderInv();}
+function updYS(){
+  let yc=0,ys=0,yt=0,yT=0;
+  for(let m=0;m<12;m++)invData[m].forEach(r=>{yc++;ys+=Number(r.sales)||0;yt+=Number(r.tax)||0;yT+=Number(r.total)||0;});
+  document.getElementById('y-cnt').textContent=yc;document.getElementById('y-sal').textContent=fmt(ys);
+  document.getElementById('y-tax').textContent=fmt(yt);document.getElementById('y-tot').textContent=fmt(yT);
+}
+
+// ===== 月份作業 =====
+let mlM=new Date().getMonth();
+let mlExpanded={};
+
+function renderMonthlyInit(){renderMonthly();}
+function renderMonthly(){
+  const tabs=document.getElementById('ml-month-tabs');
+  if(tabs)tabs.innerHTML=MONTHS.map((mn,i)=>`<button onclick="mlSelectMonth(${i})" style="padding:7px 16px;border-radius:20px;border:2px solid ${i===mlM?'#1a6b3a':'#d4eddf'};background:${i===mlM?'#1a6b3a':'#fff'};color:${i===mlM?'#fff':'#1a6b3a'};font-size:14px;font-weight:${i===mlM?'700':'400'};cursor:pointer;">${mn}</button>`).join('');
+  mlRenderList();
+}
+function mlSelectMonth(m){mlM=m;mlExpanded={};renderMonthly();}
+function mlExpandAll(){[...vendorDir.taxable,...vendorDir.exempt].forEach(v=>mlExpanded[v]=true);mlRenderList();}
+function mlCollapseAll(){mlExpanded={};mlRenderList();}
+
+// 取得叫貨金額（svData）
+function mlGetOrderAmt(v,s,m){
+  const d=svData[m]&&svData[m][s]&&svData[m][s][v];
+  return Number(d&&d.amount)||0;
+}
+// 取得上月橘色未收金額
+function mlGetPrevOrange(v,type,m){
+  if(m===0)return 0;
+  const prev=m-1;
+  let total=0;
+  STORES.forEach(s=>{
+    const d=colData[prev][type][v]&&colData[prev][type][v][s];
+    if(d&&d.amount&&d.color==='cc-orange') total+=Number(d.amount)||0;
+  });
+  return total;
+}
+// 取得應收金額 = 本月叫貨 + 上月橘色未收
+function mlGetShouldAmt(v,type){
+  const orderAmt=STORES.reduce((sum,s)=>sum+mlGetOrderAmt(v,s,mlM),0);
+  const prevOrange=mlGetPrevOrange(v,type,mlM);
+  return orderAmt+prevOrange;
+}
+
+function mlRenderList(){
+  const taxEl=document.getElementById('ml-tax-list');
+  const exEl=document.getElementById('ml-ex-list');
+  const totEl=document.getElementById('ml-grand-total');
+  if(!taxEl||!exEl)return;
+  let grand=0;
+
+  function mkRow(v,type){
+    const orderAmt=STORES.reduce((sum,s)=>sum+mlGetOrderAmt(v,s,mlM),0);
+    const prevOrange=mlGetPrevOrange(v,type,mlM);
+    const should=orderAmt+prevOrange;
+
+    if(!colData[mlM][type][v])colData[mlM][type][v]={};
+    const data=colData[mlM][type][v];
+
+    // 如果本月沒叫貨也沒有上月橘色也沒有填過資料，不顯示
+    if(!should&&!Object.keys(data).some(k=>data[k]&&(data[k].amount||data[k].color)))return'';
+    const note=data['_note']||'';
+    const isNext=NEXT_MONTH_V.has(v);
+    const expanded=mlExpanded[v]||false;
+
+    // 實收 = 只計算標🟩已收到的金額（含上月未收）
+    let recvTotal=0;
+    STORES.forEach(s=>{
+      const d=data[s];if(d&&d.amount&&d.color==='cc-green')recvTotal+=Number(d.amount)||0;
+      // 上月未收卡片的金額
+      const pk=data[`_prev_${s}`];if(pk&&pk.amount&&pk.color==='cc-green')recvTotal+=Number(pk.amount)||0;
+    });
+    grand+=recvTotal;
+
+    const diff=recvTotal-should;
+    const diffTxt=should===0&&recvTotal===0?'':diff===0?'✓':diff>0?`+$${diff.toLocaleString()}`:`-$${Math.abs(diff).toLocaleString()}`;
+    const diffColor=diff===0?'#166534':diff>0?'#1d4ed8':'#c62828';
+    const rowBg=diff===0&&should>0?'rgba(22,101,52,0.04)':diff<0&&recvTotal>0?'rgba(198,40,40,0.04)':'';
+
+
+
+    const hasStoreData=STORES.some(s=>mlGetOrderAmt(v,s,mlM)>0||(data[s]&&data[s].amount))||prevOrange>0;
+
+    // 各店卡片（本月叫貨）
+    const storeCards=STORES.map((s,si)=>{
+      const svAmt=mlGetOrderAmt(v,s,mlM);
+      if(!data[s])data[s]={amount:0,color:''};
+      const d=data[s];
+      if(!svAmt&&!d.amount)return'';
+      const bg=d.color==='cc-green'?'#f0faf4':d.color==='cc-orange'?'#fff8f0':'#fafffe';
+      const border=d.color==='cc-green'?'#b7e0c9':d.color==='cc-orange'?'#fddcb5':'#e8f0ec';
+      return`<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;border-radius:8px;border:1px solid ${border};background:${bg};min-width:105px;">
+        <span style="font-size:12px;font-weight:700;color:#1a4731;">${s}</span>
+        ${svAmt?`<span style="font-size:11px;color:#4a7a5a;">叫 $${svAmt.toLocaleString()}</span>`:''}
+        <input type="number" value="${d.amount||''}" placeholder="${svAmt||'0'}"
+          style="width:100px;border:1px solid #d4eddf;border-radius:5px;padding:5px 7px;font-size:14px;text-align:right;font-family:monospace;outline:none;"
+          onchange="mlSetStoreAmt('${type}','${v}','${s}',${mlM},this.value)"
+          onfocus="this.select()"
+          onclick="event.stopPropagation()"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();event.stopPropagation();this.blur();}">
+        <select style="width:100px;border:1px solid #d4eddf;border-radius:5px;padding:4px 5px;font-size:12px;outline:none;background:#fff;cursor:pointer;"
+          onclick="event.stopPropagation()"
+          onchange="mlSetStoreColor('${type}','${v}','${s}',${mlM},this.value)">
+          <option value="" ${!d.color?'selected':''}>⬜ 未處理</option>
+          <option value="cc-green" ${d.color==='cc-green'?'selected':''}>🟩 已收到</option>
+          <option value="cc-orange" ${d.color==='cc-orange'?'selected':''}>🟧 下月才收</option>
+        </select>
+      </div>`;
+    }).filter(Boolean).join('');
+
+    // 上月橘色未收卡片（帶到本月的）
+    const prevOrangeCards=mlM>0?STORES.map(s=>{
+      const prev=mlM-1;
+      const pd=colData[prev][type][v]&&colData[prev][type][v][s];
+      if(!pd||!pd.amount||pd.color!=='cc-orange')return'';
+      const prevAmt=Number(pd.amount)||0;
+      // 本月這間店的「上月未收」進度存在特殊key
+      const key=`_prev_${s}`;
+      if(!data[key])data[key]={amount:prevAmt,color:''};
+      const d=data[key];
+      const bg=d.color==='cc-green'?'#f0faf4':'#fff8f0';
+      const border=d.color==='cc-green'?'#b7e0c9':'#fddcb5';
+      return`<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;border-radius:8px;border:2px solid ${border};background:${bg};min-width:105px;position:relative;">
+        <span style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#ea6c00;color:#fff;font-size:9px;padding:1px 6px;border-radius:8px;white-space:nowrap;font-weight:700;">上月未收</span>
+        <span style="font-size:12px;font-weight:700;color:#1a4731;margin-top:4px;">${s}</span>
+        <span style="font-size:11px;color:#c25000;font-weight:600;">$${prevAmt.toLocaleString()}</span>
+        <input type="number" value="${d.amount||prevAmt}" placeholder="${prevAmt}"
+          style="width:100px;border:1px solid #fddcb5;border-radius:5px;padding:5px 7px;font-size:14px;text-align:right;font-family:monospace;outline:none;"
+          onchange="mlSetPrevStoreAmt('${type}','${v}','${s}',${mlM},this.value)"
+          onfocus="this.select()"
+          onclick="event.stopPropagation()"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();event.stopPropagation();this.blur();}">
+        <select style="width:100px;border:1px solid #fddcb5;border-radius:5px;padding:4px 5px;font-size:12px;outline:none;background:#fff;cursor:pointer;"
+          onclick="event.stopPropagation()"
+          onchange="mlSetPrevStoreColor('${type}','${v}','${s}',${mlM},this.value)">
+          <option value="" ${!d.color?'selected':''}>⬜ 未處理</option>
+          <option value="cc-green" ${d.color==='cc-green'?'selected':''}>🟩 已收到</option>
+          <option value="cc-orange" ${d.color==='cc-orange'?'selected':''}>🟧 再下月</option>
+        </select>
+      </div>`;
+    }).filter(Boolean).join(''):'';
+
+    const allCards=(storeCards||'')+(prevOrangeCards||'');
+
+    const prevOrangeHint='';
+
+    return`<div>
+      <div id="ml-row-${type}-${v.replace(/[^a-zA-Z0-9]/g,'_')}"
+        style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid #e8f5ee;flex-wrap:wrap;background:${rowBg};cursor:${hasStoreData?'pointer':'default'};"
+        onclick="${hasStoreData?`mlToggle('${v}')`:''}" >
+        <span style="font-size:13px;color:#888;width:16px;flex-shrink:0;">${hasStoreData?(expanded?'▼':'▶'):' '}</span>
+        <span style="min-width:180px;flex-shrink:0;font-size:14px;font-weight:600;color:#1a4731;">${v}${isNext?' <span title="算次月">⤵️</span>':''}</span>
+        ${prevOrangeHint}
+        <span style="flex:1;"></span>
+        <span style="font-size:13px;color:#4a7a5a;font-family:monospace;">應收 <b style="color:#1a4731;font-size:14px;">${should?'$'+should.toLocaleString():'—'}</b></span>
+        <span style="font-size:13px;color:#4a7a5a;font-family:monospace;">實收 <b class="ml-recv" style="color:#166534;font-size:14px;">${recvTotal?'$'+recvTotal.toLocaleString():'—'}</b></span>
+        <span class="ml-diff" style="font-size:15px;font-weight:700;color:${diffColor};min-width:60px;text-align:center;">${diffTxt||'—'}</span>
+        <button onclick="event.stopPropagation();mlConfirmAll('${type}','${v}')"
+          style="padding:5px 12px;background:#1a6b3a;color:#fff;border:none;border-radius:5px;font-size:13px;cursor:pointer;white-space:nowrap;">✓ 全收</button>
+        <button onclick="event.stopPropagation();mlCancelAll('${type}','${v}')"
+          style="padding:5px 12px;background:#fff;color:#4a5568;border:1px solid #d4eddf;border-radius:5px;font-size:13px;cursor:pointer;white-space:nowrap;">↺ 取消</button>
+        <input onclick="event.stopPropagation()" value="${note}" placeholder="備註"
+          style="width:120px;border:1px solid #e8f5ee;border-radius:5px;padding:5px 8px;font-size:13px;outline:none;"
+          oninput="mlSetNote('${type}','${v}',this.value)">
+      </div>
+      ${expanded&&(prevOrangeCards||storeCards)?`<div style="padding:12px 16px 12px 48px;background:#f8fdf9;border-bottom:1px solid #e8f5ee;display:flex;flex-wrap:wrap;gap:16px;">${prevOrangeCards}${storeCards}</div>`:''}
+    </div>`;
+  }
+
+  taxEl.innerHTML=vendorDir.taxable.map(v=>mkRow(v,'taxable')).join('');
+  exEl.innerHTML=vendorDir.exempt.map(v=>mkRow(v,'exempt')).join('');
+
+  // 計算應稅/免稅分別合計
+  let taxRecv=0,exRecv=0,taxShould=0,exShould=0;
+  vendorDir.taxable.forEach(v=>{
+    taxShould+=mlGetShouldAmt(v,'taxable');
+    STORES.forEach(s=>{const d=colData[mlM].taxable[v]&&colData[mlM].taxable[v][s];if(d&&d.amount&&d.color==='cc-green')taxRecv+=Number(d.amount)||0;});
+  });
+  vendorDir.exempt.forEach(v=>{
+    exShould+=mlGetShouldAmt(v,'exempt');
+    STORES.forEach(s=>{const d=colData[mlM].exempt[v]&&colData[mlM].exempt[v][s];if(d&&d.amount&&d.color==='cc-green')exRecv+=Number(d.amount)||0;});
+  });
+
+  const taxTotEl=document.getElementById('ml-tax-total');
+  const exTotEl=document.getElementById('ml-ex-total');
+  if(taxTotEl)taxTotEl.innerHTML=`應收 <b>$${taxShould.toLocaleString()}</b> ｜ 實收 <b style="color:#166534;">$${taxRecv.toLocaleString()}</b>`;
+  if(exTotEl)exTotEl.innerHTML=`應收 <b>$${exShould.toLocaleString()}</b> ｜ 實收 <b style="color:#166534;">$${exRecv.toLocaleString()}</b>`;
+  if(totEl)totEl.textContent='$'+(taxRecv+exRecv).toLocaleString();
+}
+
+function recvTotal_grand(g){return g.toLocaleString();}
+
+function mlToggle(v){mlExpanded[v]=!mlExpanded[v];mlRenderList();}
+
+function mlConfirmAll(type,v){
+  STORES.forEach(s=>{
+    const d=colData[mlM][type][v]&&colData[mlM][type][v][s];
+    if(d&&d.amount)d.color='cc-green';
+    // 上月未收也一併標記
+    const pk=colData[mlM][type][v]&&colData[mlM][type][v][`_prev_${s}`];
+    if(pk&&pk.amount)pk.color='cc-green';
+  });
+  mlRenderList();autoSave();
+}
+function mlSetStoreAmt(type,v,s,m,val){
+  if(!colData[m][type][v])colData[m][type][v]={};
+  if(!colData[m][type][v][s])colData[m][type][v][s]={amount:0,color:''};
+  colData[m][type][v][s].amount=Number(val)||0;
+  if(!svData[m])svData[m]={};
+  if(!svData[m][s])svData[m][s]={};
+  if(!svData[m][s][v])svData[m][s][v]={checked:false,amount:0};
+  svData[m][s][v].amount=Number(val)||0;
+  svData[m][s][v].checked=!!(Number(val));
+  mlUpdateRowSummary(type,v);
+  autoSave();
+}
+function mlUpdateRowSummary(type,v){
+  const should=mlGetShouldAmt(v,type);
+  const data=colData[mlM][type][v]||{};
+  let recvTotal=0;
+  STORES.forEach(s=>{
+    const d=data[s];if(d&&d.amount&&d.color==='cc-green')recvTotal+=Number(d.amount)||0;
+    const pk=data[`_prev_${s}`];if(pk&&pk.amount&&pk.color==='cc-green')recvTotal+=Number(pk.amount)||0;
+  });
+  const diff=recvTotal-should;
+  const diffTxt=should===0&&recvTotal===0?'':diff===0?'✓':diff>0?`+$${diff.toLocaleString()}`:`-$${Math.abs(diff).toLocaleString()}`;
+  const diffColor=diff===0?'#166534':diff>0?'#1d4ed8':'#c62828';
+  const rowEl=document.getElementById(`ml-row-${type}-${v.replace(/[^a-zA-Z0-9]/g,'_')}`);
+  if(rowEl){
+    const diffEl=rowEl.querySelector('.ml-diff');
+    const recvEl=rowEl.querySelector('.ml-recv');
+    if(diffEl){diffEl.textContent=diffTxt||'—';diffEl.style.color=diffColor;}
+    if(recvEl)recvEl.textContent=recvTotal?'$'+recvTotal.toLocaleString():'—';
+  }
+  let grand=0;
+  [...vendorDir.taxable.map(v=>({v,type:'taxable'})),...vendorDir.exempt.map(v=>({v,type:'exempt'}))].forEach(({v,type})=>{
+    const d=colData[mlM][type][v]||{};
+    STORES.forEach(s=>{const dd=d[s];if(dd&&dd.amount&&dd.color==='cc-green')grand+=Number(dd.amount)||0;});
+  });
+  const totEl=document.getElementById('ml-grand-total');
+  if(totEl)totEl.textContent='$'+grand.toLocaleString();
+}
+function mlSetPrevStoreAmt(type,v,s,m,val){
+  if(!colData[m][type][v])colData[m][type][v]={};
+  const key=`_prev_${s}`;
+  if(!colData[m][type][v][key])colData[m][type][v][key]={amount:0,color:''};
+  colData[m][type][v][key].amount=Number(val)||0;
+  mlUpdateRowSummary(type,v);autoSave();
+}
+function mlSetPrevStoreColor(type,v,s,m,color){
+  if(!colData[m][type][v])colData[m][type][v]={};
+  const key=`_prev_${s}`;
+  if(!colData[m][type][v][key])colData[m][type][v][key]={amount:0,color:''};
+  colData[m][type][v][key].color=color;
+  // 若標🟧，下下月也要帶入
+  mlRenderList();autoSave();
+}
+function mlCancelAll(type,v){
+  STORES.forEach(s=>{
+    const d=colData[mlM][type][v]&&colData[mlM][type][v][s];
+    if(d)d.color='';
+    const pk=colData[mlM][type][v]&&colData[mlM][type][v][`_prev_${s}`];
+    if(pk)pk.color='';
+  });
+  mlRenderList();autoSave();
+}
+function mlSetStoreColor(type,v,s,m,color){
+  if(!colData[m][type][v])colData[m][type][v]={};
+  if(!colData[m][type][v][s])colData[m][type][v][s]={amount:0,color:''};
+  colData[m][type][v][s].color=color;
+  mlRenderList();autoSave();
+}
+function mlSetNote(type,v,val){
+  if(!colData[mlM][type][v])colData[mlM][type][v]={};
+  colData[mlM][type][v]['_note']=val;autoSave();
+}
+
+
+// ===== 收發票 =====
+function getCarry(month){
+  // 橘色(cc-orange)只列在下方清單，不帶入當月表格欄位
+  return{taxable:{},exempt:{}};
+}
+// 上月橘色清單（帶入本月的那些），含打勾功能
+function renderPendingList(m){
+  const list=document.getElementById('pending-list');
+  const countEl=document.getElementById('pending-count');
+  const titleEl=document.getElementById('pending-month-label');
+  if(!list)return;
+  if(m===0){
+    list.innerHTML=`<div class="pending-empty">1月無上月資料</div>`;
+    if(countEl)countEl.textContent='';
+    return;
+  }
+  const prev=m-1;
+  const taxItems=[];const exItems=[];
+  TAX_V.forEach(vendor=>{
+    STORES.forEach(s=>{
+      const d=colData[prev].taxable[vendor]&&colData[prev].taxable[vendor][s];
+      if(d&&d.amount&&d.color==='cc-orange'){
+        const checked=d.pendingChecked||false;
+        taxItems.push({store:s,vendor,amount:d.amount,type:'taxable',checked,prev});
+      }
+    });
+  });
+  EX_V.forEach(vendor=>{
+    STORES.forEach(s=>{
+      const d=colData[prev].exempt[vendor]&&colData[prev].exempt[vendor][s];
+      if(d&&d.amount&&d.color==='cc-orange'){
+        const checked=d.pendingChecked||false;
+        exItems.push({store:s,vendor,amount:d.amount,type:'exempt',checked,prev});
+      }
+    });
+  });
+  const total=taxItems.length+exItems.length;
+  if(titleEl)titleEl.textContent=`${MONTHS[prev]}未收到的憑證`;
+  if(countEl)countEl.textContent=total?`共 ${total} 筆`:'';
+  if(!total){
+    list.innerHTML=`<div class="pending-empty">${MONTHS[prev]}無橘色（下月才收）憑證</div>`;
+    return;
+  }
+  function mkSection(items,label){
+    if(!items.length)return'';
+    return`<div class="pending-sec-title">${label}</div>`+items.map(it=>`
+      <div class="pending-row ${it.checked?'pr-checked':''}">
+        <label class="pr-chk"><input type="checkbox" ${it.checked?'checked':''} onchange="togglePendingCheck('${it.type}','${it.vendor}','${it.store}',${it.prev},this.checked,${m})"></label>
+        <div class="pr-store">${it.store}</div>
+        <div class="pr-vendor">${it.vendor}</div>
+        <div class="pr-amt">$${fmtN(it.amount)}</div>
+      </div>`).join('');
+  }
+  list.innerHTML=mkSection(taxItems,'📋 應稅')+mkSection(exItems,'📋 免稅');
+}
+const EX_QUERY_STORES=['梁鑫','府中','景新'];
+const EX_QUERY_VENDORS=['振源'];
+const EX_QUERY_MAP={
+  '振源':[
+    {label:'梁鑫', stores:['鑫耀鑫','天津'], vendor:'蛋 (振源-梁鑫拿)', type:'exempt'},
+    {label:'府中', stores:['梁鑫','大直'],    vendor:'蛋 (振源-梁鑫拿)', type:'exempt'},
+    {label:'景新', stores:['景新','心惦'],     vendor:'蛋 (振源-梁鑫拿)', type:'exempt'},
+  ]
+};
+
+function renderExQuery(){
+  // 振源和名陽已直接寫在HTML，不需要動態產生
+}
+
+function editVendorName(td,type,rowIdx){
+  const arr=type==='taxable'?TAX_V:EX_V;
+  const oldName=arr[rowIdx];
+  const inp=document.createElement('input');
+  inp.value=oldName;
+  inp.style.cssText='width:100%;border:none;background:transparent;font-size:13px;font-weight:500;color:#1a1f3a;outline:none;font-family:inherit;';
+  td.innerHTML='';td.appendChild(inp);inp.focus();inp.select();
+  function save(){
+    const newName=inp.value.trim()||oldName;
+    arr[rowIdx]=newName;
+    // 把舊資料key改成新名稱
+    for(let m=0;m<12;m++){
+      if(colData[m][type][oldName]){
+        colData[m][type][newName]=colData[m][type][oldName];
+        delete colData[m][type][oldName];
+      }
+    }
+    renderCollect();
+  }
+  inp.addEventListener('blur',save);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){inp.blur();}if(e.key==='Escape'){arr[rowIdx]=oldName;renderCollect();}});
+}
+function calcZhenyuan(){
+  const lx=Number(document.getElementById('zy-lx')&&document.getElementById('zy-lx').value)||0;
+  const fc=Number(document.getElementById('zy-fc')&&document.getElementById('zy-fc').value)||0;
+  const jx=Number(document.getElementById('zy-jx')&&document.getElementById('zy-jx').value)||0;
+  const tot=document.getElementById('zy-total');
+  if(tot) tot.textContent=(lx+fc+jx).toLocaleString();
+  autoSave();
+}
+function calcMingyang(){
+  const lx=Number(document.getElementById('my-lx')&&document.getElementById('my-lx').value)||0;
+  const fc=Number(document.getElementById('my-fc')&&document.getElementById('my-fc').value)||0;
+  const jx=Number(document.getElementById('my-jx')&&document.getElementById('my-jx').value)||0;
+  const tot=document.getElementById('my-total');
+  if(tot) tot.textContent=(lx+fc+jx).toLocaleString();
+  autoSave();
+}
+// Enter跳下一格（振源+名陽）
+function initInvoiceEnter(){
+  const ids=['zy-lx','zy-fc','zy-jx','my-lx','my-fc','my-jx'];
+  ids.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){
+        e.preventDefault();
+        const next=document.getElementById(ids[i+1]);
+        if(next){next.focus();next.select();}
+      }
+    });
+  });
+}
+function reloadSvAmt(type,v,s,m,amt,rowId){
+  if(!colData[m][type][v]) colData[m][type][v]={};
+  if(!colData[m][type][v][s]) colData[m][type][v][s]={amount:0,color:''};
+  colData[m][type][v][s].amount=amt;
+  // 更新輸入框
+  const el=document.getElementById(rowId);
+  if(el) el.textContent=amt||'';
+  renderCollect();
+}
+function updateExTotal(v,vid){}
+function togglePendingCheck(type,vendor,store,prev,checked,m){
+  if(!colData[prev][type][vendor])colData[prev][type][vendor]={};
+  if(!colData[prev][type][vendor][store])colData[prev][type][vendor][store]={amount:0,color:''};
+  colData[prev][type][vendor][store].pendingChecked=checked;
+  renderPendingList(m);
+}
+// ===== 店面收發票 =====
+// svData[month][store][vendorName] = {checked, amount}
+let svData={};
+for(let m=0;m<12;m++){svData[m]={};STORES.forEach(s=>{svData[m][s]={};});}
+let curSvStore=STORES[0];
+
+// 廠商目錄（共用，可新增）
+let vendorDir={
+  taxable:[...TAX_V],
+  exempt:[...EX_V]
+};
+
+function getSvMonth(){return parseInt(document.getElementById('sv-month')?.value||0);}
+
+// 沿用上月設定
+function inheritLastMonth(store,month){
+  if(month===0)return;
+  const prev=svData[month-1][store]||{};
+  if(!svData[month][store]) svData[month][store]={};
+  // 只沿用勾選狀態，不沿用金額
+  Object.keys(prev).forEach(v=>{
+    if(!svData[month][store][v]) svData[month][store][v]={checked:prev[v].checked||false,amount:0};
+    else if(svData[month][store][v].checked===undefined) svData[month][store][v].checked=prev[v].checked||false;
+  });
+}
+
+function renderStoreViewTabs(){
+  const el=document.getElementById('sv-store-tabs');
+  if(!el)return;
+  el.innerHTML=STORES.map(s=>`
+    <button onclick="selectSvStore('${s}')" style="padding:8px 16px;font-size:13px;font-weight:600;border-radius:6px;border:2px solid ${s===curSvStore?'#2d3748':'#e2e8f0'};background:${s===curSvStore?'#2d3748':'#fff'};color:${s===curSvStore?'#fff':'#4a5568'};cursor:pointer;">${s}</button>
+  `).join('');
+}
+
+function selectSvStore(s){
+  curSvStore=s;
+  renderStoreView();
+}
+
+function renderStoreView(){
+  renderStoreViewTabs();
+  const m=getSvMonth();
+  const store=curSvStore;
+  inheritLastMonth(store,m);
+  if(!svData[m][store]) svData[m][store]={};
+  const data=svData[m][store];
+
+  // 計算本店本月合計
+  let total=0;
+  Object.keys(data).forEach(v=>{if(data[v].checked) total+=Number(data[v].amount)||0;});
+
+  const el=document.getElementById('sv-content');
+  if(!el)return;
+
+  const mkSection=(vendors,type,label,color)=>{
+    if(!vendors.length)return'';
+    const rows=vendors.map(v=>{
+      const d=data[v]||(data[v]={checked:false,amount:0});
+      return `<tr style="${d.checked?'background:rgba(22,101,52,0.06)':''}">
+        <td style="padding:5px 8px;width:30px;text-align:center;">
+          <input type="checkbox" ${d.checked?'checked':''} style="width:15px;height:15px;accent-color:#166534;cursor:pointer;"
+            onchange="svToggle('${v}','${type}',${m},'${store}',this.checked)">
+        </td>
+        <td style="padding:5px 8px;font-size:13px;font-weight:${d.checked?'600':'400'};color:${d.checked?'#1a2e1a':'#9a9a9a'};white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;">${v}</td>
+        <td style="padding:5px 6px;width:110px;">
+          ${d.checked
+            ?`<input type="number" value="${d.amount||''}" placeholder="0"
+                style="width:100px;border:1px solid #b7e0c9;border-radius:4px;padding:4px 6px;font-size:13px;text-align:right;font-family:monospace;outline:none;"
+                oninput="svSetAmount('${v}','${type}',${m},'${store}',this.value)"
+                onfocus="this.style.borderColor='#2d3748'" onblur="this.style.borderColor='#e2e8f0'">`
+            :`<span style="color:#ddd;font-size:12px;">—</span>`}
+        </td>
+      </tr>`;
+    }).join('');
+    return `<div style="margin-bottom:12px;">
+      <div style="background:${color};color:#fff;padding:5px 12px;font-size:12px;font-weight:700;border-radius:5px 5px 0 0;">${label}</div>
+      <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #b7e0c9;border-top:none;border-radius:0 0 5px 5px;">
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  };
+
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+      <span style="font-size:15px;font-weight:700;color:#2d3748;">${store} — ${['1','2','3','4','5','6','7','8','9','10','11','12'][m]}月</span>
+      <span style="background:#2d3748;color:#fff;padding:5px 14px;border-radius:6px;font-size:13px;font-weight:700;">
+        合計：<span id="sv-store-total">$${total.toLocaleString()}</span>
+      </span>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:280px;">${mkSection(vendorDir.taxable,'taxable','應稅廠商','#4a5568')}</div>
+      <div style="flex:1;min-width:280px;">${mkSection(vendorDir.exempt,'exempt','免稅廠商','#2d6a4f')}</div>
+    </div>
+  `;
+}
+
+function svToggle(vendor,type,m,store,checked){
+  if(!svData[m][store][vendor]) svData[m][store][vendor]={checked:false,amount:0};
+  svData[m][store][vendor].checked=checked;
+  // 同步到收發票colData
+  syncSvToCollect(m);
+  renderStoreView();
+  autoSave();
+}
+
+function svSetAmount(vendor,type,m,store,val){
+  if(!svData[m][store][vendor]) svData[m][store][vendor]={checked:true,amount:0};
+  svData[m][store][vendor].amount=Number(val)||0;
+  // 更新本店合計顯示
+  const data=svData[m][store];
+  let total=0;
+  Object.keys(data).forEach(v=>{if(data[v].checked) total+=Number(data[v].amount)||0;});
+  const el=document.getElementById('sv-store-total');
+  if(el) el.textContent='$'+total.toLocaleString();
+  // 同步到收發票colData
+  syncSvToCollect(m);
+  autoSave();
+}
+
+// 把svData同步到colData（收發票總表）
+function syncSvToCollect(m){
+  // 先清空colData該月所有門市金額
+  [...TAX_V,...vendorDir.taxable.filter(v=>!TAX_V.includes(v))].forEach(v=>{
+    if(!colData[m].taxable[v]) colData[m].taxable[v]={};
+    STORES.forEach(s=>{if(colData[m].taxable[v][s]) colData[m].taxable[v][s].amount=0;});
+  });
+  [...EX_V,...vendorDir.exempt.filter(v=>!EX_V.includes(v))].forEach(v=>{
+    if(!colData[m].exempt[v]) colData[m].exempt[v]={};
+    STORES.forEach(s=>{if(colData[m].exempt[v][s]) colData[m].exempt[v][s].amount=0;});
+  });
+  // 從svData填入
+  STORES.forEach(store=>{
+    const data=svData[m][store]||{};
+    Object.keys(data).forEach(vendor=>{
+      const d=data[vendor];
+      if(!d.checked||!d.amount) return;
+      const isTax=vendorDir.taxable.includes(vendor);
+      const type=isTax?'taxable':'exempt';
+      if(!colData[m][type][vendor]) colData[m][type][vendor]={};
+      if(!colData[m][type][vendor][store]) colData[m][type][vendor][store]={amount:0,color:''};
+      colData[m][type][vendor][store].amount=d.amount;
+    });
+  });
+}
+
+// 廠商目錄管理
+function showVendorMgr(){
+  renderVendorMgr();
+  document.getElementById('vendor-mgr-overlay').style.display='flex';
+}
+function closeVendorMgr(){
+  document.getElementById('vendor-mgr-overlay').style.display='none';
+  renderStoreView();
+}
+function renderVendorMgr(){
+  const mkList=(vendors,type)=>vendors.map((v,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f0f0f0;">
+      <span id="vmgr-name-${type}-${i}" style="flex:1;font-size:13px;color:#1a4731;cursor:pointer;" 
+        onclick="editVendorMgrItem('${type}',${i})" title="點擊編輯">${v}</span>
+      <button onclick="editVendorMgrItem('${type}',${i})" style="background:none;border:none;color:#4a5568;font-size:12px;cursor:pointer;padding:2px 5px;" title="編輯">✏️</button>
+      <button onclick="removeVendor('${type}',${i})" style="background:none;border:none;color:#e53e3e;font-size:14px;cursor:pointer;padding:2px 5px;" title="刪除">✕</button>
+    </div>`).join('');
+  document.getElementById('vmgr-tax').innerHTML=mkList(vendorDir.taxable,'taxable')||'<div style="color:#aaa;font-size:12px;padding:6px 0;">尚無廠商</div>';
+  document.getElementById('vmgr-ex').innerHTML=mkList(vendorDir.exempt,'exempt')||'<div style="color:#aaa;font-size:12px;padding:6px 0;">尚無廠商</div>';
+}
+function editVendorMgrItem(type,idx){
+  const span=document.getElementById(`vmgr-name-${type}-${idx}`);
+  if(!span)return;
+  const oldName=vendorDir[type][idx];
+  const inp=document.createElement('input');
+  inp.value=oldName;
+  inp.style.cssText='flex:1;border:1px solid #1a6b3a;border-radius:4px;padding:3px 7px;font-size:13px;outline:none;width:100%;';
+  span.replaceWith(inp);
+  inp.focus();inp.select();
+  function save(){
+    const newName=inp.value.trim();
+    if(!newName){inp.value=oldName;renderVendorMgr();return;}
+    if(newName!==oldName){
+      // 更新vendorDir
+      vendorDir[type][idx]=newName;
+      // 同步colData所有月份
+      for(let m=0;m<12;m++){
+        if(colData[m][type][oldName]){
+          colData[m][type][newName]=colData[m][type][oldName];
+          delete colData[m][type][oldName];
+        }
+      }
+      // 同步svData
+      for(let m=0;m<12;m++){
+        STORES.forEach(s=>{
+          if(svData[m]&&svData[m][s]&&svData[m][s][oldName]){
+            svData[m][s][newName]=svData[m][s][oldName];
+            delete svData[m][s][oldName];
+          }
+        });
+      }
+      // 同步TAX_V/EX_V
+      const arr=type==='taxable'?TAX_V:EX_V;
+      const ai=arr.indexOf(oldName);
+      if(ai>=0)arr[ai]=newName;
+    }
+    renderVendorMgr();
+    autoSave();
+  }
+  inp.addEventListener('blur',save);
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();inp.blur();}
+    if(e.key==='Escape'){inp.value=oldName;inp.blur();}
+  });
+}
+function addVendor(){
+  const name=document.getElementById('new-vendor-name').value.trim();
+  const type=document.getElementById('new-vendor-type').value;
+  if(!name)return;
+  if(vendorDir[type].includes(name)){alert('廠商已存在！');return;}
+  vendorDir[type].push(name);
+  // 同步加入TAX_V/EX_V和colData
+  const arr=type==='taxable'?TAX_V:EX_V;
+  if(!arr.includes(name))arr.push(name);
+  for(let m=0;m<12;m++){
+    if(!colData[m][type][name]) colData[m][type][name]={};
+  }
+  document.getElementById('new-vendor-name').value='';
+  renderVendorMgr();
+  renderCollect();
+  autoSave();
+}
+function removeVendor(type,idx){
+  if(!confirm('確定刪除此廠商？'))return;
+  const name=vendorDir[type][idx];
+  vendorDir[type].splice(idx,1);
+  // 同步從TAX_V/EX_V移除
+  const arr=type==='taxable'?TAX_V:EX_V;
+  const ai=arr.indexOf(name);
+  if(ai>=0)arr.splice(ai,1);
+  renderVendorMgr();
+  renderCollect();
+  autoSave();
+}
+
+function renderStoreViewInit(){
+  const m=new Date().getMonth();
+  const sel=document.getElementById('sv-month');
+  if(sel) sel.value=m;
+  renderStoreView();
+}
+function switchCollectTab(tab){
+  curCollectTab=tab;
+  document.getElementById('ctab-tax').classList.toggle('active',tab==='tax');
+  document.getElementById('ctab-ex').classList.toggle('active',tab==='ex');
+  renderCollect();
+}
+
+function renderCheckMode(){
+  const m=curColM;
+  const wrap=document.getElementById('col-check-wrap');
+  const lbl=document.getElementById('check-month-label');
+  if(!wrap)return;
+  if(lbl) lbl.textContent=MONTHS[m];
+
+  const allVendors=[
+    ...vendorDir.taxable.map(v=>({v,type:'taxable'})),
+    ...vendorDir.exempt.map(v=>({v,type:'exempt'}))
+  ];
+
+  let rows='';
+  let grandTotal=0;
+  allVendors.forEach(({v,type})=>{
+    // 應收 = svData 叫貨金額加總
+    let shouldRecv=0;
+    STORES.forEach(s=>{
+      const sd=svData[m]&&svData[m][s]&&svData[m][s][v];
+      shouldRecv+=Number(sd&&sd.amount)||0;
+    });
+    // 實收 = colData 收發票填的金額加總
+    const data=colData[m][type][v]||{};
+    let actualRecv=0;
+    STORES.forEach(s=>{
+      const d=data[s];
+      actualRecv+=Number(d&&d.amount)||0;
+    });
+    if(!shouldRecv&&!actualRecv)return;
+    grandTotal+=actualRecv;
+    const diff=actualRecv-shouldRecv;
+    const diffColor=diff===0?'#166534':diff>0?'#1d4ed8':'#c62828';
+    const diffText=diff===0?'✓':diff>0?`+$${diff.toLocaleString()}`:`-$${Math.abs(diff).toLocaleString()}`;
+    const rowBg=diff===0&&shouldRecv>0?'background:rgba(22,101,52,0.06);':diff<0?'background:rgba(198,40,40,0.04);':'';
+    const isNext=NEXT_MONTH_V.has(v);
+    rows+=`<div style="padding:7px 10px;border-bottom:1px solid #e8f5ee;${rowBg}">
+      <div style="font-size:12px;font-weight:600;color:#1a4731;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${v}">
+        ${v}${isNext?'<span style="color:#c62828;font-size:15px;margin-left:4px;line-height:1;">▶</span>':''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;font-size:11px;font-family:monospace;">
+        <div style="color:#4a5568;">應收<br><b style="color:#1a4731;">${shouldRecv?'$'+shouldRecv.toLocaleString():'—'}</b></div>
+        <div style="color:#4a5568;">實收<br><b style="color:#166534;">${actualRecv?'$'+actualRecv.toLocaleString():'—'}</b></div>
+        <div style="color:#4a5568;">差額<br><b style="color:${diffColor};font-size:12px;">${shouldRecv||actualRecv?diffText:'—'}</b></div>
+      </div>
+    </div>`;
+  });
+
+  wrap.innerHTML=(rows||'<div style="padding:12px;color:#aaa;font-size:12px;text-align:center;">本月尚無資料</div>')
+    +`<div style="padding:10px 12px;background:#1a6b3a;border-top:2px solid #145a2e;">
+        <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-bottom:2px;">實際收到發票總金額</div>
+        <div style="font-size:18px;font-weight:700;color:#fff;font-family:monospace;">$${grandTotal.toLocaleString()}</div>
+      </div>`;
+}
+
+function renderCollect(){
+  buildMtabs('col-mtabs',curColM,()=>false,v=>{curColM=v;},renderCollect);
+  const m=curColM,carry=getCarry(m),wrap=document.getElementById('col-wrap');wrap.innerHTML='';
+  const tbl=document.createElement('table');tbl.className='ctbl';
+  // 表頭：每個店面一個欄位，各用不同顏色
+  let hdr=`<thead><tr><th class="lbl" style="background:#f0f7f2;font-size:14px;font-weight:700;">廠商</th>`;
+  STORES.forEach((s,si)=>hdr+=`<th class="th-s th-s${si}" style="font-size:14px;">${s}</th>`);
+  hdr+=`<th class="th-sum" style="width:90px;min-width:90px;font-size:14px;">備註</th></tr></thead>`;
+  tbl.innerHTML=hdr;
+  const tbody=document.createElement('tbody');
+
+  function mkHdrRows(){
+    let r1=`<tr><td class="lbl r-decl">明細發票金額</td>`;
+    STORES.forEach((s,si)=>{const v=colData[m].header[s]&&colData[m].header[s].declared||0;r1+=`<td class="r-decl cs${si}"><input class="ci" value="${v||''}" onchange="updHdr('${s}','declared',this.value,${m})"></td>`;});
+    r1+=`<td class="r-decl"></td></tr>`;
+    let r2=`<tr><td class="lbl r-adj">有異動金額</td>`;
+    STORES.forEach((s,si)=>{const v=colData[m].header[s]&&colData[m].header[s].adj||0;r2+=`<td class="r-adj cs${si}"><input class="ci" value="${v||''}" onchange="updHdr('${s}','adj',this.value,${m})"></td>`;});
+    r2+=`<td class="r-adj"></td></tr>`;
+    let r3=`<tr><td class="lbl r-actual">實收發票金額</td>`;
+    STORES.forEach((s,si)=>{const dec=Number(colData[m].header[s]&&colData[m].header[s].declared)||0;const adj=Number(colData[m].header[s]&&colData[m].header[s].adj)||0;r3+=`<td class="r-actual cs${si}">${dec+adj||''}</td>`;});
+    r3+=`<td class="r-actual"></td></tr>`;
+    return r1+r2+r3;
+  }
+
+  function mkVRow(type,v,rowIdx){
+    const data=colData[m][type][v]||(colData[m][type][v]={});
+    const cv=(type==='taxable'?carry.taxable:carry.exempt)[v]||{};
+    const rowId=`tot-${m}-${type}-${rowIdx}`;
+    const nextMonth=NEXT_MONTH_V.has(v);
+    let cells=`<td class="lbl" title="${v}" ondblclick="editVendorName(this,'${type}',${rowIdx})" style="cursor:pointer;">
+      ${v}${nextMonth?'<span style="color:#c62828;font-size:14px;margin-left:4px;line-height:1;">▶</span>':''}
+    </td>`;let rs=0;
+    STORES.forEach((s,si)=>{
+      const d=data[s]||(data[s]={amount:0,color:''});
+      const ca=cv[s]||0;
+      const isCarry=ca>0&&!d.amount;
+      // 應收合計：全部數字都加，不管顏色
+      rs+=Number(d.amount)||0;
+      const baseCls=isCarry?'r-carry':`cs${si}`;
+      const colorCls=d.color?(' '+d.color):'';
+      const ph=isCarry?String(ca):'';
+      const carryTitle=isCarry?`title="↩ 上月【${s}】${v} 未收到 $${ca}"` :'';
+      // 從svData取得叫貨金額
+      const svAmt=svData[m]&&svData[m][s]&&svData[m][s][v]&&svData[m][s][v].checked?Number(svData[m][s][v].amount)||0:0;
+      cells+=`<td class="${baseCls}${colorCls}" style="padding:1px 2px;min-width:0;" ${carryTitle}>
+        <div style="display:flex;align-items:center;gap:0;white-space:nowrap;">
+          <input class="ci" type="number" value="${d.amount||''}" placeholder="${svAmt||ph}" style="width:40px;text-align:right;" onchange="updV('${type}','${v}','${s}',this.value,${m},'${rowId}')">
+          <select style="border:none;background:transparent;font-size:10px;cursor:pointer;outline:none;padding:0;width:18px;flex-shrink:0;" onchange="updVColor('${type}','${v}','${s}',${m},this.value,this.closest('td'))">
+            <option value="" ${!d.color?'selected':''}>⬜</option>
+            <option value="cc-green" ${d.color==='cc-green'?'selected':''}>🟩</option>
+            <option value="cc-orange" ${d.color==='cc-orange'?'selected':''}>🟧</option>
+          </select>
+          ${svAmt?`<span style="font-size:10px;color:#9a9;cursor:pointer;padding:0 1px;" title="重新帶入叫貨金額 $${svAmt}" onclick="reloadSvAmt('${type}','${v}','${s}',${m},${svAmt},'${rowId}')">↺</span>`:''}
+        </div>
+      </td>`;
+    });
+    const act=data['_actual']||0;
+    cells+=`<td><input class="ci" style="width:86px" value="${data['_note']||''}" onchange="updVN('${type}','${v}',this.value,${m})"></td>`;
+    return `<tr>${cells}</tr>`;
+  }
+
+  function mkCarryRow(type){
+    const cd=type==='taxable'?carry.taxable:carry.exempt;
+    let hasAny=false;let cells=`<td class="lbl r-carry" style="font-style:italic;">↩ 上月未收到（自動帶入）</td>`;let rs=0;
+    STORES.forEach((s,si)=>{
+      let sc=0;[...TAX_V,...EX_V].forEach(v=>{const vc=cd[v]&&cd[v][s]||0;if(vc)hasAny=true;sc+=vc;});
+      const title=sc?`title="【${s}】上月未收到合計 $${sc}"`:'';
+      rs+=sc;cells+=`<td class="r-carry cs${si}" style="font-weight:${sc?'700':'400'}" ${title}>${sc||''}</td>`;
+    });
+    cells+=`<td class="r-carry" style="font-weight:700">${rs||''}</td><td></td>`;
+    return hasAny?`<tr>${cells}</tr>`:'';
+  }
+
+  let html=mkHdrRows();
+  if(curCollectTab==='tax'){
+    html+=`<tr><td class="sec sec-tax" colspan="${STORES.length+2}">▶ 應稅</td></tr>`;
+    vendorDir.taxable.forEach((v,i)=>html+=mkVRow('taxable',v,i));
+  } else {
+    html+=`<tr><td class="sec sec-ex" colspan="${STORES.length+2}">▶ 免稅</td></tr>`;
+    vendorDir.exempt.forEach((v,i)=>html+=mkVRow('exempt',v,i));
+  }
+  tbody.innerHTML=html;tbl.appendChild(tbody);wrap.appendChild(tbl);
+  // Enter 跳下一個輸入格
+  const inputs=tbl.querySelectorAll('input.ci[type="number"]');
+  inputs.forEach((inp,idx)=>{
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){e.preventDefault();const next=inputs[idx+1];if(next){next.focus();next.select();}}
+    });
+  });
+  renderColSummary(m);
+  renderPendingList(m);
+  renderExQuery();
+  renderCheckMode();
+  // 底部三區塊只在應稅顯示
+  const bb=document.getElementById('col-bottom-blocks');
+  if(bb) bb.style.display=curCollectTab==='tax'?'flex':'none';
+}
+function updVColor(type,v,s,m,color,td){
+  if(!colData[m][type][v])colData[m][type][v]={};
+  if(!colData[m][type][v][s])colData[m][type][v][s]={amount:0,color:''};
+  colData[m][type][v][s].color=color;
+  const si=STORES.indexOf(s);
+  const isCarry=td.classList.contains('r-carry');
+  const base=isCarry?'r-carry':`cs${si}`;
+  td.className=base+(color?' '+color:'');
+  renderPendingList(m);
+  renderCheckMode();
+  autoSave();
+}
+function updHdr(s,k,v,m){if(!colData[m].header[s])colData[m].header[s]={declared:0,adj:0};colData[m].header[s][k]=Number(v)||0;renderCollect();}
+function updV(t,v,s,val,m,rowId){
+  if(!colData[m][t][v])colData[m][t][v]={};
+  if(!colData[m][t][v][s])colData[m][t][v][s]={amount:0,color:''};
+  colData[m][t][v][s].amount=Number(val)||0;
+  if(rowId){
+    const data=colData[m][t][v];
+    let rs=0;
+    STORES.forEach(s2=>{
+      const d=data[s2]||(data[s2]={amount:0,color:''});
+      // 應收合計：全部加總不管顏色
+      rs+=Number(d.amount)||0;
+    });
+    const el=document.getElementById(rowId);
+    if(el)el.textContent=rs||'';
+  }
+  renderColSummary(m);
+  autoSave();
+}
+function updVA(t,v,val,m){
+  if(!colData[m][t][v])colData[m][t][v]={};
+  colData[m][t][v]['_actual']=Number(val)||0;
+  // 如果實開 = 合計，整列所有店面格子自動改綠色
+  const act=Number(val)||0;
+  if(act>0){
+    const data=colData[m][t][v];
+    let rs=0;
+    STORES.forEach(s=>{rs+=Number(data[s]&&data[s].amount)||0;});
+    if(act===rs){
+      STORES.forEach(s=>{
+        if(!data[s])data[s]={amount:0,color:''};
+        if(data[s].amount)data[s].color='cc-green';
+      });
+    }
+  }
+  renderCollect();
+  autoSave();
+}
+function updVN(t,v,val,m){if(!colData[m][t][v])colData[m][t][v]={};colData[m][t][v]['_note']=val;autoSave();}
+function renderColSummary(m){
+  let tx=0,ex=0;
+  vendorDir.taxable.forEach(v=>STORES.forEach(s=>{
+    const d=colData[m].taxable[v]&&colData[m].taxable[v][s];
+    tx+=Number(d&&d.amount)||0;
+  }));
+  vendorDir.exempt.forEach(v=>STORES.forEach(s=>{
+    const d=colData[m].exempt[v]&&colData[m].exempt[v][s];
+    ex+=Number(d&&d.amount)||0;
+  }));
+  document.getElementById('col-tax-tot').textContent=fmt(tx);
+  document.getElementById('col-ex-tot').textContent=fmt(ex);
+}
+
+// ===== 每月表單 =====
+function renderMform(){
+  buildMtabs('mf-mtabs',curMfM,()=>false,v=>{curMfM=v;},renderMform);
+  const grid=document.getElementById('mform-grid');grid.innerHTML='';
+  OPEN_STORES.forEach(store=>{
+    const sec=document.createElement('div');sec.className='mfsec';
+    let h=`<div class="mfsec-title">${store}</div>`;
+    h+=`<div class="mfrow mftot"><span class="mflbl" style="font-weight:600">📄 發票費用</span></div>`;
+    INV_ITEMS.forEach(item=>{h+=`<div class="mfrow"><span class="mflbl">${item}</span><input class="mfinp" type="number" value="${mfData[curMfM][store][item]||''}" placeholder="0" onchange="updMf('${store}','${item}',this.value)"></div>`;});
+    const it=INV_ITEMS.reduce((s,i)=>s+(Number(mfData[curMfM][store][i])||0),0);
+    h+=`<div class="mfrow mftot"><span class="mflbl">發票小計</span><span class="mfinp" style="font-weight:700;text-align:right">${it?fmt(it):''}</span></div>`;
+    h+=`<div class="mfrow mftot" style="margin-top:4px"><span class="mflbl" style="font-weight:600">💰 成本費用</span></div>`;
+    COST_ITEMS.forEach(item=>{h+=`<div class="mfrow"><span class="mflbl">${item}</span><input class="mfinp" type="number" value="${mfData[curMfM][store][item]||''}" placeholder="0" onchange="updMf('${store}','${item}',this.value)"></div>`;});
+    const ct=COST_ITEMS.reduce((s,i)=>s+(Number(mfData[curMfM][store][i])||0),0);
+    h+=`<div class="mfrow mftot"><span class="mflbl">成本小計</span><span class="mfinp" style="font-weight:700;text-align:right">${ct?fmt(ct):''}</span></div>`;
+    h+=`<div class="mfrow mfgrand"><span class="mflbl" style="font-weight:700">月合計</span><span class="mfinp" style="font-weight:700;color:#0d3320;text-align:right">${(it+ct)?fmt(it+ct):''}</span></div>`;
+    sec.innerHTML=h;grid.appendChild(sec);
+  });
+}
+function updMf(store,item,val){mfData[curMfM][store][item]=Number(val)||0;renderMform();}
+
+// ===== 梁平開發票 =====
+function renderOi(){
+  buildMtabs('oi-mtabs',curOiM,i=>oiData[i].length>0,v=>{curOiM=v;},renderOi);
+  const tbody=document.getElementById('oi-body');tbody.innerHTML='';let tot=0,tax=0;
+  oiData[curOiM].forEach((r,i)=>{
+    tot+=Number(r.total)||0;tax+=Number(r.tax)||0;
+    const bo=STORES.map(s=>`<option ${r.buyer===s?'selected':''}>${s}</option>`).join('');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:#556680;font-size:10px;text-align:center">${i+1}</td>
+      <td><input value="${r.inv||''}" onchange="oiU(${i},'inv',this.value)"></td>
+      <td><input type="date" value="${r.date||''}" onchange="oiU(${i},'date',this.value)"></td>
+      <td><select onchange="oiU(${i},'buyer',this.value)">${bo}</select></td>
+      <td><input value="${r.item||''}" onchange="oiU(${i},'item',this.value)"></td>
+      <td><input type="number" value="${r.sales||''}" readonly></td>
+      <td><input type="number" value="${r.tax||''}" readonly></td>
+      <td><input type="number" value="${r.total||''}" min="0" onchange="oiT(${i},this.value)"></td>
+      <td><input value="${r.note||''}" onchange="oiU(${i},'note',this.value)"></td>
+      <td><button class="del" onclick="oiD(${i})">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('oi-tot').textContent=fmt(tot);
+  document.getElementById('oi-tax').textContent=fmt(tax);
+}
+function oiU(i,k,v){oiData[curOiM][i][k]=v;}
+function oiT(i,v){const r=oiData[curOiM][i];r.total=Number(v)||0;const{s,t}=calcST(r.total,'應稅');r.sales=s;r.tax=t;renderOi();}
+function oiD(i){oiData[curOiM].splice(i,1);renderOi();}
+function addOiRow(){const mm=String(curOiM+1).padStart(2,'0');oiData[curOiM].push({inv:'',date:`2026-${mm}-01`,buyer:STORES[0],item:'',sales:0,tax:0,total:0,note:''});renderOi();}
+
+// ===== 梁平出貨單 =====
+function renderDv(){
+  buildMtabs('dv-mtabs',curDvM,i=>dvData[i].length>0,v=>{curDvM=v;},renderDv);
+  const tbody=document.getElementById('dv-body');tbody.innerHTML='';
+  dvData[curDvM].forEach((r,i)=>{
+    const so=STORES.map(s=>`<option ${r.store===s?'selected':''}>${s}</option>`).join('');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:#556680;font-size:10px;text-align:center">${i+1}</td>
+      <td><input type="date" value="${r.date||''}" onchange="dvU(${i},'date',this.value)"></td>
+      <td><select onchange="dvU(${i},'store',this.value)">${so}</select></td>
+      <td><input value="${r.item||''}" onchange="dvU(${i},'item',this.value)"></td>
+      <td><input type="number" value="${r.qty||''}" min="0" onchange="dvCalc(${i},'qty',this.value)"></td>
+      <td><input type="number" value="${r.price||''}" min="0" onchange="dvCalc(${i},'price',this.value)"></td>
+      <td><input type="number" value="${r.amt||''}" readonly></td>
+      <td><input value="${r.invref||''}" onchange="dvU(${i},'invref',this.value)"></td>
+      <td><input value="${r.note||''}" onchange="dvU(${i},'note',this.value)"></td>
+      <td><button class="del" onclick="dvD(${i})">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function dvU(i,k,v){dvData[curDvM][i][k]=v;}
+function dvCalc(i,k,v){dvData[curDvM][i][k]=Number(v)||0;dvData[curDvM][i].amt=(dvData[curDvM][i].qty||0)*(dvData[curDvM][i].price||0);renderDv();}
+function dvD(i){dvData[curDvM].splice(i,1);renderDv();}
+function addDvRow(){const mm=String(curDvM+1).padStart(2,'0');dvData[curDvM].push({date:`2026-${mm}-01`,store:STORES[0],item:'',qty:0,price:0,amt:0,invref:'',note:''});renderDv();}
+
+// ===== 發票編號表（自動抓取） =====
+function getInvnoData(m){
+  const rows=invData[m].filter(r=>r.exempt!=='免稅'&&r.type!=='0稅額');
+  const typeOrder=['大A4','小A4','三聯式','手寫發票','傳統發票','電子發票'];
+  rows.sort((a,b)=>{
+    const ti=typeOrder.indexOf(a.type)-typeOrder.indexOf(b.type);
+    if(ti!==0)return ti;
+    return (a.date||'').localeCompare(b.date||'');
+  });
+  return rows;
+}
+function renderInvno(){
+  buildMtabs('invno-mtabs',curInvnoM,i=>invData[i].some(r=>r.exempt!=='免稅'&&r.type!=='0稅額'),v=>{curInvnoM=v;},renderInvno);
+  const rows=getInvnoData(curInvnoM);
+  const tbody=document.getElementById('invno-body');tbody.innerHTML='';
+  rows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:#556680;font-size:10px;text-align:center">${i+1}</td>
+      <td>${r.store}</td><td>${r.type}</td><td style="font-family:monospace">${r.inv||'－'}</td>
+      <td>${r.date}</td><td style="text-align:right">${fmtN(r.total)}</td><td>${r.note||''}</td>`;
+    tbody.appendChild(tr);
+  });
+  if(!rows.length){const tr=document.createElement('tr');tr.innerHTML=`<td colspan="7" style="text-align:center;color:#556680;padding:16px">本月無應稅發票資料</td>`;tbody.appendChild(tr);}
+}
+function refreshInvno(){renderInvno();}
+
+// ===== 收據 =====
+function renderRec(){
+  const tbody=document.getElementById('rec-body');tbody.innerHTML='';let tot=0;
+  recData.forEach((r,i)=>{
+    tot+=Number(r.total)||0;
+    const so=STORES.map(s=>`<option ${r.store===s?'selected':''}>${s}</option>`).join('');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:#556680;font-size:10px;text-align:center">${i+1}</td>
+      <td><select onchange="recU(${i},'store',this.value)">${so}</select></td>
+      <td><input type="date" value="${r.date}" onchange="recU(${i},'date',this.value)"></td>
+      <td><input type="number" value="${r.total}" onchange="recU(${i},'total',this.value)"></td>
+      <td><input value="${r.note}" onchange="recU(${i},'note',this.value)"></td>
+      <td><button class="del" onclick="recD(${i})">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('r-cnt').textContent=recData.length;
+  document.getElementById('r-tot').textContent=fmt(tot);
+}
+function recU(i,k,v){recData[i][k]=v;if(k==='total')renderRec();}
+function recD(i){recData.splice(i,1);renderRec();}
+function addRecRow(){recData.push({store:STORES[0],date:new Date().toISOString().slice(0,10),total:0,note:''});renderRec();}
+
+// ===== 稅務分析 =====
+function stab(id,btn){document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.sub-page').forEach(p=>p.classList.remove('active'));document.getElementById('sp-'+id).classList.add('active');btn.classList.add('active');renderTax();}
+function renderTax(){
+  const ab=document.getElementById('alloc-body');ab.innerHTML='';let ag=0;
+  MONTHS.forEach((m,mi)=>{const a={};OPEN_STORES.forEach(s=>a[s]=0);invData[mi].forEach(r=>{if(OPEN_STORES.includes(r.store))a[r.store]+=(Number(r.total)||0);});const rt=OPEN_STORES.reduce((s,st)=>s+a[st],0);ag+=rt;const tr=document.createElement('tr');tr.innerHTML=`<td>${m}</td>${OPEN_STORES.map(s=>`<td style="text-align:right">${a[s]?fmt(a[s]):''}</td>`).join('')}<td style="text-align:right;font-weight:600">${rt?fmt(rt):''}</td>`;ab.appendChild(tr);});
+  document.getElementById('alloc-tot').textContent=fmt(ag);
+  const ib=document.getElementById('istat-body');ib.innerHTML='';
+  MONTHS.forEach((m,mi)=>{let ts=0,tt=0,tT=0,ex=0,z=0;invData[mi].forEach(r=>{if(r.exempt==='免稅')ex+=Number(r.total)||0;else if(r.type==='0稅額')z+=Number(r.total)||0;else{ts+=Number(r.sales)||0;tt+=Number(r.tax)||0;tT+=Number(r.total)||0;}});const tr=document.createElement('tr');tr.innerHTML=`<td>${m}</td><td style="text-align:right">${ts?fmt(ts):''}</td><td style="text-align:right">${tt?fmt(tt):''}</td><td style="text-align:right">${tT?fmt(tT):''}</td><td style="text-align:right">${ex?fmt(ex):''}</td><td style="text-align:right">${z?fmt(z):''}</td><td style="text-align:right;font-weight:600">${(tT+ex+z)?fmt(tT+ex+z):''}</td>`;ib.appendChild(tr);});
+  const vb=document.getElementById('vat-body');vb.innerHTML='';
+  for(let i=0;i<12;i+=2){let inT=0,outT=0;for(let j=i;j<Math.min(i+2,12);j++){invData[j].forEach(r=>inT+=Number(r.tax)||0);oiData[j].forEach(r=>outT+=Number(r.tax)||0);}const diff=outT-inT;const tr=document.createElement('tr');tr.innerHTML=`<td>${MONTHS[i]}～${MONTHS[Math.min(i+1,11)]}</td><td style="text-align:right">${fmt(inT)}</td><td style="text-align:right">${fmt(outT)}</td><td style="text-align:right">${fmt(diff)}</td><td style="text-align:right;font-weight:600;color:${diff>0?'#c62828':'#2d7a4a'}">${diff>0?'應繳 '+fmt(diff):'退稅 '+fmt(Math.abs(diff))}</td>`;vb.appendChild(tr);}
+  const cb=document.getElementById('cit-body');cb.innerHTML='';
+  MONTHS.forEach((m,mi)=>{const inc=oiData[mi].reduce((s,r)=>s+(Number(r.total)||0),0);const cost=Object.values(mfData[mi]).reduce((s,st)=>s+COST_ITEMS.reduce((ss,i)=>ss+(Number(st[i])||0),0),0);const exp=Object.values(mfData[mi]).reduce((s,st)=>s+INV_ITEMS.reduce((ss,i)=>ss+(Number(st[i])||0),0),0);const gr=inc-cost;const net=gr-exp;const tax=Math.max(0,Math.round(net*0.2));const tr=document.createElement('tr');tr.innerHTML=`<td>${m}</td><td style="text-align:right">${inc?fmt(inc):''}</td><td style="text-align:right">${cost?fmt(cost):''}</td><td style="text-align:right;color:${gr<0?'#c62828':'inherit'}">${gr?fmt(gr):''}</td><td style="text-align:right">${exp?fmt(exp):''}</td><td style="text-align:right;font-weight:600;color:${net<0?'#c62828':'#2d7a4a'}">${net?fmt(net):''}</td><td style="text-align:right">${tax?fmt(tax):''}</td>`;cb.appendChild(tr);});
+}
+
+// ===== 薪資清冊 =====
+function payStore(s,btn){
+  curPayStore=s;
+  document.querySelectorAll('.pay-store-tabs .pstab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.querySelectorAll('.pay-page').forEach(p=>p.classList.remove('active'));
+  if(s==='emp'){document.getElementById('pp-emp').classList.add('active');renderEmp();}
+  else{document.getElementById('pp-'+s).classList.add('active');renderPayStore(s);}
+}
+function empStore(s,btn){
+  curEmpStore=s;
+  document.querySelectorAll('#pp-emp .pay-store-tabs .pstab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderEmp();
+}
+function renderEmp(){
+  const tbody=document.getElementById('emp-body');tbody.innerHTML='';
+  empData[curEmpStore].forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:#556680;font-size:10px;text-align:center">${i+1}</td>
+      <td><input value="${r.title||''}" onchange="empU(${i},'title',this.value)"></td>
+      <td><input value="${r.name||''}" onchange="empU(${i},'name',this.value)"></td>
+      <td><input value="${r.id||''}" onchange="empU(${i},'id',this.value)" style="font-family:monospace"></td>
+      <td><input value="${r.addr||''}" onchange="empU(${i},'addr',this.value)"></td>
+      <td><input type="number" value="${r.base||''}" onchange="empU(${i},'base',this.value)"></td>
+      <td><input type="number" value="${r.insured||''}" onchange="empU(${i},'insured',this.value)"></td>
+      <td><input value="${r.note||''}" onchange="empU(${i},'note',this.value)"></td>
+      <td><button class="del" onclick="empD(${i})">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function empU(i,k,v){empData[curEmpStore][i][k]=k==='base'||k==='insured'?Number(v)||0:v;}
+function empD(i){empData[curEmpStore].splice(i,1);renderEmp();}
+function addEmpRow(){empData[curEmpStore].push({title:'服務員',name:'',id:'',addr:'',base:29500,insured:40100,note:''});renderEmp();}
+
+function getPayRows(store,month){
+  const emps=empData[store]||[];
+  const saved=payData[store][month]||[];
+  return emps.map((e,i)=>{
+    const s=saved[i]||{};
+    return{...e,flex:s.flex||0,leave:s.leave||0,ot:s.ot||0,food:s.food||0};
+  });
+}
+function renderPayStore(store){
+  if(store==='emp')return;
+  const container=document.getElementById('pay-'+store);if(!container)return;
+  const month=curPayMonth[store];
+  const info=STORE_INFO[store];
+  const rows=getPayRows(store,month);
+  const totals={A:0,B:0,C:0,hEmp:0,hPer:0,base:0,flex:0,leave:0,ot:0,food:0};
+
+  // Build month tabs
+  let mtabsHtml=`<div class="mtabs" style="margin-bottom:10px">`;
+  MONTHS.forEach((m,i)=>{mtabsHtml+=`<button class="mtab${i===month?' active':''}" onclick="setPayMonth('${store}',${i})">${m}</button>`;});
+  mtabsHtml+=`</div>`;
+
+  // Header info
+  const year=115;const mNum=month+1;
+  const headerTxt=`公司：${info.full} / 統編：${info.tax} / 健保單位代號：${info.health}　　${year}年${mNum}月份薪資`;
+
+  let html=mtabsHtml;
+  html+=`<div class="pay-header">${headerTxt}</div>`;
+  html+=`<div class="toolbar" style="margin-top:8px">
+    <button class="btn excel" onclick="exportPayXLSX('${store}')">⬇ 匯出 Excel</button>
+  </div>`;
+  html+=`<div class="tbl-wrap"><table>
+    <thead><tr>
+      <th>#</th><th>職稱</th><th>姓名</th><th>身份證字號</th><th style="min-width:160px">住址</th>
+      <th>薪資總額A</th><th>投保薪資B</th><th>差額A-B=C</th>
+      <th>二代健保(雇主)</th><th>二代健保(個人)</th>
+      <th>底薪</th><th>彈性補貼</th><th>請假/補薪</th><th>加班費</th><th>伙食費</th>
+      <th></th>
+    </tr></thead><tbody id="pay-body-${store}"></tbody>
+    <tfoot><tr id="pay-foot-${store}"></tr></tfoot>
+  </table></div>`;
+  container.innerHTML=html;
+
+  const tbody=document.getElementById('pay-body-'+store);
+  rows.forEach((r,i)=>{
+    const A=r.base+(r.flex||0)+(r.leave||0)+(r.ot||0)+(r.food||0);
+    const B=r.insured||0;const C=A-B;
+    const hEmp=Math.round(Math.max(0,C)*0.0211);
+    const hPer=Math.round(Math.max(0,C)*0.0211);
+    totals.A+=A;totals.B+=B;totals.C+=C;totals.hEmp+=hEmp;totals.hPer+=hPer;
+    totals.base+=r.base||0;totals.flex+=r.flex||0;totals.leave+=r.leave||0;totals.ot+=r.ot||0;totals.food+=r.food||0;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:#556680;font-size:10px;text-align:center">${i+1}</td>
+      <td>${r.title||''}</td><td style="white-space:nowrap">${r.name||''}</td>
+      <td style="font-family:monospace;font-size:10px">${r.id||''}</td>
+      <td style="font-size:10px">${r.addr||''}</td>
+      <td style="text-align:right;font-weight:600">${fmtN(A)}</td>
+      <td style="text-align:right">${fmtN(B)}</td>
+      <td style="text-align:right;color:${C<0?'#c62828':'inherit'}">${fmtN(C)}</td>
+      <td style="text-align:right;color:#e65100">${fmtN(hEmp)}</td>
+      <td style="text-align:right;color:#1565c0">${fmtN(hPer)}</td>
+      <td style="text-align:right">${fmtN(r.base)}</td>
+      <td><input type="number" value="${r.flex||''}" placeholder="0" style="text-align:right" onchange="updPay('${store}',${month},${i},'flex',this.value)"></td>
+      <td><input type="number" value="${r.leave||''}" placeholder="0" style="text-align:right" onchange="updPay('${store}',${month},${i},'leave',this.value)"></td>
+      <td><input type="number" value="${r.ot||''}" placeholder="0" style="text-align:right" onchange="updPay('${store}',${month},${i},'ot',this.value)"></td>
+      <td><input type="number" value="${r.food||''}" placeholder="0" style="text-align:right" onchange="updPay('${store}',${month},${i},'food',this.value)"></td>
+      <td><button class="del" title="清除本月資料" onclick="clearPayRow('${store}',${month},${i})">↺</button></td>`;
+    tbody.appendChild(tr);
+  });
+
+  // footer totals
+  const foot=document.getElementById('pay-foot-'+store);
+  if(foot){foot.innerHTML=`<td colspan="5" style="font-weight:700;text-align:right;background:#f0f7f2;color:#2d5a4a">合計</td>
+    <td style="text-align:right;font-weight:700;background:#f0f7f2">${fmtN(totals.A)}</td>
+    <td style="text-align:right;background:#f0f7f2">${fmtN(totals.B)}</td>
+    <td style="text-align:right;background:#f0f7f2">${fmtN(totals.C)}</td>
+    <td style="text-align:right;color:#e65100;background:#f0f7f2">${fmtN(totals.hEmp)}</td>
+    <td style="text-align:right;color:#1565c0;background:#f0f7f2">${fmtN(totals.hPer)}</td>
+    <td style="text-align:right;background:#f0f7f2">${fmtN(totals.base)}</td>
+    <td style="text-align:right;background:#f0f7f2">${fmtN(totals.flex)}</td>
+    <td style="text-align:right;background:#f0f7f2">${fmtN(totals.leave)}</td>
+    <td style="text-align:right;background:#f0f7f2">${fmtN(totals.ot)}</td>
+    <td style="text-align:right;background:#f0f7f2">${fmtN(totals.food)}</td>
+    <td style="background:#f0f7f2"></td>`;}
+}
+function setPayMonth(store,m){curPayMonth[store]=m;renderPayStore(store);}
+function updPay(store,month,i,k,v){
+  if(!payData[store][month])payData[store][month]=[];
+  if(!payData[store][month][i])payData[store][month][i]={};
+  payData[store][month][i][k]=Number(v)||0;
+  renderPayStore(store);
+}
+function clearPayRow(store,month,i){
+  if(payData[store][month]&&payData[store][month][i])payData[store][month][i]={};
+  renderPayStore(store);
+}
+
+// ===== EXCEL EXPORTS =====
+const mkWS=d=>XLSX.utils.aoa_to_sheet(d);
+const mkWb=(d,n)=>{const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,mkWS(d),n);return wb;};
+const dlX=(wb,n)=>XLSX.writeFile(wb,n);
+
+function exportInvXLSX(){const h=['#','門市','發票號碼','日期','銷售額','稅額','總計金額','發票類別','已取得','免稅','備註'];dlX(mkWb([h,...invData[curInvM].map((r,i)=>[i+1,r.store,r.inv,r.date,r.sales,r.tax,r.total,r.type,r.obtained,r.exempt,r.note])],MONTHS[curInvM]),`發票明細_${MONTHS[curInvM]}_2026.xlsx`);}
+function exportAllInvXLSX(){const wb=XLSX.utils.book_new();const h=['#','門市','發票號碼','日期','銷售額','稅額','總計金額','發票類別','已取得','免稅','備註'];MONTHS.forEach((m,i)=>{if(invData[i].length)XLSX.utils.book_append_sheet(wb,mkWS([h,...invData[i].map((r,j)=>[j+1,r.store,r.inv,r.date,r.sales,r.tax,r.total,r.type,r.obtained,r.exempt,r.note])]),m);});if(!wb.SheetNames.length){alert('無資料');return;}dlX(wb,'發票明細_全年_2026.xlsx');}
+function exportRecXLSX(){dlX(mkWb([['#','門市','日期','總金額','備註'],...recData.map((r,i)=>[i+1,r.store,r.date,r.total,r.note])],'收據明細'),'收據明細_2026.xlsx');}
+function exportCollectXLSX(){
+  const wb=XLSX.utils.book_new();const m=curColM;
+  const h=['','廠商',...STORES.flatMap(s=>[s,'已收到']),'合計','實開','差額','備註'];
+  const d=[h];
+  d.push(['明細發票金額','',...STORES.flatMap(s=>[colData[m].header[s]&&colData[m].header[s].declared||'','']),'','','','']);
+  d.push(['有異動金額','',...STORES.flatMap(s=>[colData[m].header[s]&&colData[m].header[s].adj||'','']),'','','','']);
+  d.push(['應稅','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','']);
+  TAX_V.forEach(v=>{const row=['應稅',v,...STORES.flatMap(s=>[colData[m].taxable[v]&&colData[m].taxable[v][s]&&colData[m].taxable[v][s].amount||'',colData[m].taxable[v]&&colData[m].taxable[v][s]&&colData[m].taxable[v][s].received?'✓':'']),STORES.reduce((s,st)=>s+(Number(colData[m].taxable[v]&&colData[m].taxable[v][st]&&colData[m].taxable[v][st].amount)||0),0),colData[m].taxable[v]&&colData[m].taxable[v]['_actual']||'','',colData[m].taxable[v]&&colData[m].taxable[v]['_note']||''];d.push(row);});
+  d.push(['免稅']);
+  EX_V.forEach(v=>{const row=['免稅',v,...STORES.flatMap(s=>[colData[m].exempt[v]&&colData[m].exempt[v][s]&&colData[m].exempt[v][s].amount||'',colData[m].exempt[v]&&colData[m].exempt[v][s]&&colData[m].exempt[v][s].received?'✓':'']),STORES.reduce((s,st)=>s+(Number(colData[m].exempt[v]&&colData[m].exempt[v][st]&&colData[m].exempt[v][st].amount)||0),0),colData[m].exempt[v]&&colData[m].exempt[v]['_actual']||'','',colData[m].exempt[v]&&colData[m].exempt[v]['_note']||''];d.push(row);});
+  XLSX.utils.book_append_sheet(wb,mkWS(d),MONTHS[m]);dlX(wb,`收發票_${MONTHS[m]}_2026.xlsx`);
+}
+function exportMformXLSX(){const h=['費用項目',...OPEN_STORES];const d=[h,['發票費用'],...INV_ITEMS.map(i=>[i,...OPEN_STORES.map(s=>mfData[curMfM][s][i]||'')]),['發票小計',...OPEN_STORES.map(s=>INV_ITEMS.reduce((sum,i)=>sum+(Number(mfData[curMfM][s][i])||0),0))],['成本費用'],...COST_ITEMS.map(i=>[i,...OPEN_STORES.map(s=>mfData[curMfM][s][i]||'')]),['成本小計',...OPEN_STORES.map(s=>COST_ITEMS.reduce((sum,i)=>sum+(Number(mfData[curMfM][s][i])||0),0))]];dlX(mkWb(d,MONTHS[curMfM]),`每月表單_${MONTHS[curMfM]}_2026.xlsx`);}
+function exportOiXLSX(){dlX(mkWb([['#','發票號碼','日期','買受人','品項','銷售額','稅額','總計金額','備註'],...oiData[curOiM].map((r,i)=>[i+1,r.inv,r.date,r.buyer,r.item,r.sales,r.tax,r.total,r.note])],MONTHS[curOiM]),`梁平開發票_${MONTHS[curOiM]}_2026.xlsx`);}
+function exportDvXLSX(){dlX(mkWb([['#','日期','配送門市','品項','數量','單價','金額','對應發票號碼','備註'],...dvData[curDvM].map((r,i)=>[i+1,r.date,r.store,r.item,r.qty,r.price,r.amt,r.invref,r.note])],MONTHS[curDvM]),`梁平出貨單_${MONTHS[curDvM]}_2026.xlsx`);}
+function exportInvnoXLSX(){const rows=getInvnoData(curInvnoM);dlX(mkWb([['#','門市','發票類別','發票號碼','日期','總計金額','備註'],...rows.map((r,i)=>[i+1,r.store,r.type,r.inv,r.date,r.total,r.note])],MONTHS[curInvnoM]),`發票編號表_${MONTHS[curInvnoM]}_2026.xlsx`);}
+function exportAllocXLSX(){dlX(mkWb([['月份',...OPEN_STORES,'合計'],...MONTHS.map((m,mi)=>{const a={};OPEN_STORES.forEach(s=>a[s]=0);invData[mi].forEach(r=>{if(OPEN_STORES.includes(r.store))a[r.store]+=(Number(r.total)||0);});return[m,...OPEN_STORES.map(s=>a[s]||''),OPEN_STORES.reduce((s,st)=>s+(a[st]||0),0)];})],'梁平發票額度統計'),'梁平發票額度統計_2026.xlsx');}
+function exportIstatXLSX(){dlX(mkWb([['月份','應稅銷售額','應稅稅額','應稅總計','免稅金額','0稅額','本月合計'],...MONTHS.map((m,mi)=>{let ts=0,tt=0,tT=0,ex=0,z=0;invData[mi].forEach(r=>{if(r.exempt==='免稅')ex+=Number(r.total)||0;else if(r.type==='0稅額')z+=Number(r.total)||0;else{ts+=Number(r.sales)||0;tt+=Number(r.tax)||0;tT+=Number(r.total)||0;}});return[m,ts||'',tt||'',tT||'',ex||'',z||'',tT+ex+z||''];})],'梁平進項統計'),'梁平進項統計表_2026.xlsx');}
+function exportVatXLSX(){const d=[['期別','進項稅額','銷項稅額','差額','應繳/退稅']];for(let i=0;i<12;i+=2){let inT=0,outT=0;for(let j=i;j<Math.min(i+2,12);j++){invData[j].forEach(r=>inT+=Number(r.tax)||0);oiData[j].forEach(r=>outT+=Number(r.tax)||0);}const diff=outT-inT;d.push([`${MONTHS[i]}～${MONTHS[Math.min(i+1,11)]}`,inT,outT,diff,diff>0?'應繳':'退稅']);}dlX(mkWb(d,'營業稅金比對'),'營業稅金比對_2026.xlsx');}
+function exportCitXLSX(){dlX(mkWb([['月份','收入合計','成本合計','毛利','費用合計','稅前淨利','預估稅額(20%)'],...MONTHS.map((m,mi)=>{const inc=oiData[mi].reduce((s,r)=>s+(Number(r.total)||0),0);const cost=Object.values(mfData[mi]).reduce((s,st)=>s+COST_ITEMS.reduce((ss,i)=>ss+(Number(st[i])||0),0),0);const exp=Object.values(mfData[mi]).reduce((s,st)=>s+INV_ITEMS.reduce((ss,i)=>ss+(Number(st[i])||0),0),0);const gr=inc-cost;const net=gr-exp;return[m,inc||'',cost||'',gr||'',exp||'',net||'',Math.max(0,Math.round(net*0.2))||''];})],'營所稅統計'),'營所稅統計_2026.xlsx');}
+function exportEmpXLSX(){dlX(mkWb([['#','職稱','姓名','身份證字號','住址','底薪','投保薪資','備註'],...(empData[curEmpStore]||[]).map((r,i)=>[i+1,r.title,r.name,r.id,r.addr,r.base,r.insured,r.note])],curEmpStore),`員工資料_${curEmpStore}_2026.xlsx`);}
+function exportPayXLSX(store){
+  const month=curPayMonth[store];const info=STORE_INFO[store];
+  const rows=getPayRows(store,month);
+  const title=`公司：${info.full} / 統編：${info.tax} / 健保單位代號：${info.health}　115年${month+1}月份薪資`;
+  const h=['職稱','姓名','身份證字號','住址','薪資總額A','投保薪資B','差額A-B=C','二代健保(雇主)C*2.11%','二代健保(個人)C*2.11%','底薪','彈性補貼','請假/補薪','加班費','伙食費'];
+  const d=[[title],[],h,...rows.map(r=>{const A=r.base+(r.flex||0)+(r.leave||0)+(r.ot||0)+(r.food||0);const B=r.insured||0;const C=A-B;return[r.title,r.name,r.id,r.addr,A,B,C,Math.round(Math.max(0,C)*0.0211),Math.round(Math.max(0,C)*0.0211),r.base,r.flex||0,r.leave||0,r.ot||0,r.food||0];})];
+  const tot=rows.reduce((acc,r)=>{const A=r.base+(r.flex||0)+(r.leave||0)+(r.ot||0)+(r.food||0);const B=r.insured||0;const C=A-B;acc[0]+=A;acc[1]+=B;acc[2]+=C;acc[3]+=Math.round(Math.max(0,C)*0.0211);acc[4]+=Math.round(Math.max(0,C)*0.0211);acc[5]+=r.base||0;acc[6]+=r.flex||0;acc[7]+=r.leave||0;acc[8]+=r.ot||0;acc[9]+=r.food||0;return acc;},[0,0,0,0,0,0,0,0,0,0]);
+  d.push(['合計','','','',...tot]);
+  dlX(mkWb(d,MONTHS[month]),`薪資清冊_${store}_${MONTHS[month]}_2026.xlsx`);
+}
+
+// drag drop
+const dz=document.getElementById('dzone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('on');});
+dz.addEventListener('dragleave',()=>{if(!selStore)dz.classList.remove('on');});
+dz.addEventListener('drop',e=>{e.preventDefault();handleFiles(e.dataTransfer.files);});
+
+// INIT
+buildStoreSel();
+loadAll();
+renderInv();
+renderExQuery();
+initInvoiceEnter();
+loadZyMy();
+setInterval(autoSave, 30000);
+
+// 全系統 Enter 跳下一格
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter')return;
+  const inp=e.target;
+  if(inp.tagName!=='INPUT')return;
+  if(['button','submit','checkbox','file','radio'].includes(inp.type))return;
+  if(inp.closest('#ml-tax-list')||inp.closest('#ml-ex-list'))return; // 月份作業自己處理
+  const page=inp.closest('.page-inner')||document.body;
+  const all=[...page.querySelectorAll('input:not([type=button]):not([type=submit]):not([type=checkbox]):not([type=file]):not([type=radio])')].filter(i=>!i.disabled&&i.offsetParent!==null);
+  const idx=all.indexOf(inp);
+  if(idx>=0&&all[idx+1]){
+    e.preventDefault();
+    all[idx+1].focus();
+    if(all[idx+1].select)all[idx+1].select();
+  }
+});
+</script>
+</div><!-- end main-area -->
+</body>
+</html>
